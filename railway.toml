@@ -1,21 +1,12 @@
 [build]
 builder = "nixpacks"
 
-[build.nixpacksPlan]
-providers = ["node"]
-
-[build.nixpacksPlan.install]
-cmds = ["npm ci", "cd backend && npm install", "cd backend && npx prisma generate"]
-
-[build.nixpacksPlan.build]
-cmds = ["cd backend && tsc"]
-
 [deploy]
 healthcheckPath = "/api/health"
 healthcheckTimeout = 300
-restartPolicyType = "on_failure"
+restartPolicyType = "on_failure" 
 restartPolicyMaxRetries = 3
-startCommand = "cd backend && npm start"
+startCommand = "cd backend && node dist/server.js"
 
 [variables]
 NODE_ENV = "production"
