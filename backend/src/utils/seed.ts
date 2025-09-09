@@ -143,15 +143,23 @@ async function seed() {
 
     const createdCenters = [];
     for (const centerData of centers) {
-      const center = await prisma.communityCenter.upsert({
-        where: { 
-          name: centerData.name 
-        },
-        update: {},
-        create: centerData
+      // Check if center already exists
+      const existingCenter = await prisma.communityCenter.findFirst({
+        where: { name: centerData.name }
       });
+      
+      let center: any;
+      if (existingCenter) {
+        center = existingCenter;
+        console.log('Center already exists:', center.name);
+      } else {
+        center = await prisma.communityCenter.create({
+          data: centerData
+        });
+        console.log('Created center:', center.name);
+      }
+      
       createdCenters.push(center);
-      console.log('Created center:', center.name);
     }
 
     // Create some connections between centers
