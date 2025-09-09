@@ -23,7 +23,6 @@ model User {
   // Relations
   centerManagedBy    CommunityCenter[] @relation("CenterManager")
   contactMessagesSent ContactMessage[]
-  centerMessagesSent  CenterMessage[]
 
   @@map("users")
 }
