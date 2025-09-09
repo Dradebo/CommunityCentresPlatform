@@ -1,0 +1,17 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+healthcheckPath = "/api/health"
+healthcheckTimeout = 300
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
+
+[variables]
+NODE_ENV = "production"
+PORT = "3001"
+
+# Database will be automatically provided by Railway PostgreSQL service
+# Required environment variables to set in Railway:
+# - JWT_SECRET (generate a secure random string)
+# - FRONTEND_URL (URL of your deployed frontend)

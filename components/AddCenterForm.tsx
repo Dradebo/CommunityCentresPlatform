@@ -1,0 +1,270 @@
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Textarea } from './ui/textarea';
+import { Checkbox } from './ui/checkbox';
+import { Plus, MapPin } from 'lucide-react';
+
+interface CommunityCenterData {
+  name: string;
+  location: string;
+  coordinates: { lat: number; lng: number };
+  services: string[];
+  description: string;
+  addedBy: 'admin' | 'visitor';
+  contactInfo: {
+    phone?: string;
+    email?: string;
+    website?: string;
+  };
+}
+
+interface AddCenterFormProps {
+  onAddCenter: (centerData: CommunityCenterData) => void;
+  isAdmin: boolean;
+}
+
+const availableServices = [
+  'Healthcare',
+  'Education',
+  'Skills Training',
+  'Youth Programs',
+  'Women Empowerment',
+  'Childcare',
+  'Vocational Training',
+  'Computer Training',
+  'Library',
+  'Microfinance',
+  'Food Security',
+  'Mental Health',
+  'Legal Aid',
+  'Sports & Recreation',
+  'Community Events'
+];
+
+// Kampala coordinates for different areas
+const kampalaAreas = [
+  { name: 'Central Division', lat: 0.3476, lng: 32.5825 },
+  { name: 'Kawempe Division', lat: 0.3354, lng: 32.5659 },
+  { name: 'Rubaga Division', lat: 0.3029, lng: 32.5599 },
+  { name: 'Makindye Division', lat: 0.2735, lng: 32.6055 },
+  { name: 'Nakawa Division', lat: 0.3373, lng: 32.6268 }
+];
+
+export function AddCenterForm({ onAddCenter, isAdmin }: AddCenterFormProps) {
+  const [formData, setFormData] = useState({
+    name: '',
+    location: '',
+    description: '',
+    selectedServices: [] as string[],
+    phone: '',
+    email: '',
+    website: '',
+    coordinates: { lat: 0.3476, lng: 32.5825 } // Default to Central Kampala
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleServiceToggle = (service: string) => {
+    setFormData(prev => ({
+      ...prev,
+      selectedServices: prev.selectedServices.includes(service)
+        ? prev.selectedServices.filter(s => s !== service)
+        : [...prev.selectedServices, service]
+    }));
+  };
+
+  const handleLocationSelect = (area: typeof kampalaAreas[0]) => {
+    setFormData(prev => ({
+      ...prev,
+      location: area.name,
+      coordinates: { lat: area.lat, lng: area.lng }
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    // Validate form
+    if (!formData.name || !formData.location || !formData.description || formData.selectedServices.length === 0) {
+      alert('Please fill in all required fields');
+      setIsSubmitting(false);
+      return;
+    }
+
+    const centerData: CommunityCenterData = {
+      name: formData.name,
+      location: formData.location,
+      coordinates: formData.coordinates,
+      services: formData.selectedServices,
+      description: formData.description,
+      addedBy: isAdmin ? 'admin' : 'visitor',
+      contactInfo: {
+        phone: formData.phone || undefined,
+        email: formData.email || undefined,
+        website: formData.website || undefined
+      }
+    };
+
+    onAddCenter(centerData);
+
+    // Reset form
+    setFormData({
+      name: '',
+      location: '',
+      description: '',
+      selectedServices: [],
+      phone: '',
+      email: '',
+      website: '',
+      coordinates: { lat: 0.3476, lng: 32.5825 }
+    });
+
+    setIsSubmitting(false);
+    alert('Community center added successfully!');
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Plus className="h-5 w-5" />
+            <span>Add New Community Center</span>
+          </CardTitle>
+          <p className="text-sm text-gray-600">
+            {isAdmin 
+              ? 'As an admin, your submission will be automatically verified.'
+              : 'Your submission will be reviewed by administrators before being verified.'
+            }
+          </p>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Basic Information */}
+            <div className="space-y-4">
+              <h3 className="text-lg">Basic Information</h3>
+              
+              <div>
+                <Label htmlFor="name">Center Name *</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="e.g., Kampala Community Hub"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="location">Location *</Label>
+                <div className="space-y-2">
+                  <Input
+                    id="location"
+                    value={formData.location}
+                    onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                    placeholder="Enter custom location or select from suggestions below"
+                    required
+                  />
+                  <div className="text-sm text-gray-600">Quick select:</div>
+                  <div className="flex flex-wrap gap-2">
+                    {kampalaAreas.map(area => (
+                      <Button
+                        key={area.name}
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleLocationSelect(area)}
+                        className="text-xs"
+                      >
+                        <MapPin className="h-3 w-3 mr-1" />
+                        {area.name}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="description">Description *</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Describe the community center, its mission, and target community..."
+                  rows={4}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Services */}
+            <div className="space-y-4">
+              <h3 className="text-lg">Services Offered *</h3>
+              <p className="text-sm text-gray-600">Select all services that apply:</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {availableServices.map(service => (
+                  <div key={service} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={service}
+                      checked={formData.selectedServices.includes(service)}
+                      onCheckedChange={() => handleServiceToggle(service)}
+                    />
+                    <Label htmlFor={service} className="text-sm cursor-pointer">
+                      {service}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Contact Information */}
+            <div className="space-y-4">
+              <h3 className="text-lg">Contact Information</h3>
+              
+              <div>
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  value={formData.phone}
+                  onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                  placeholder="+256-700-000000"
+                  type="tel"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  id="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                  placeholder="contact@center.org"
+                  type="email"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="website">Website</Label>
+                <Input
+                  id="website"
+                  value={formData.website}
+                  onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
+                  placeholder="https://www.center.org"
+                  type="url"
+                />
+              </div>
+            </div>
+
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? 'Adding Center...' : 'Add Community Center'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
