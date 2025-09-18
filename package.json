@@ -10,7 +10,7 @@
     "build": "echo 'API deployment complete'",
     "build:backend": "cd backend && tsc",
     "build:frontend": "tsc && vite build",
-    "build:frontend:production": "tsc && vite build --mode production",
+    "build:frontend:production": "tsc && vite build --mode production && cp .htaccess dist/",
     "build:production": "npm run build:backend && npm run build:frontend",
     "vercel-build": "cd backend && npm install && npx prisma generate",
     "start": "cd backend && npm start",

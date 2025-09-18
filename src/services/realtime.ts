@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { apiService } from './api';
+import { apiService } from '../../services/api';
 
 export interface RealtimeEvent {
   type: 'new-message' | 'center-updated' | 'new-contact-message' | 'user-typing';

@@ -235,6 +235,25 @@ class APIService {
     return this.handleResponse<{ message: string; thread: any }>(response);
   }
 
+  // Generic HTTP methods
+  async get<T = any>(endpoint: string): Promise<T> {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      headers: this.getAuthHeaders(),
+    });
+
+    return this.handleResponse<T>(response);
+  }
+
+  async post<T = any>(endpoint: string, data?: any): Promise<T> {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: data ? JSON.stringify(data) : undefined,
+    });
+
+    return this.handleResponse<T>(response);
+  }
+
   // Utility method to check if user is authenticated
   isAuthenticated(): boolean {
     return !!this.getAuthToken();

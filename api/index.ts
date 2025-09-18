@@ -22,8 +22,23 @@ app.use(helmet({
 }));
 
 // CORS configuration for Vercel
+const allowedOrigins = [
+  'https://kii-impact.org',
+  process.env.FRONTEND_URL,
+  'http://localhost:3000' // For development
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || true,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, etc.)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.some(allowed => origin.startsWith(allowed))) {
+      return callback(null, true);
+    }
+
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true
 }));
 

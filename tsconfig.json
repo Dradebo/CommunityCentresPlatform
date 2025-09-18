@@ -26,7 +26,7 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*", "components/**/*", "contexts/**/*", "services/**/*"],
+  "include": ["src/**/*", "components/**/*", "contexts/**/*", "services/**/*", "vite-env.d.ts"],
   "exclude": ["node_modules", "dist", "components/ui/calendar.tsx", "components/ui/chart.tsx"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
