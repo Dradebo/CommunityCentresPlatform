@@ -7,7 +7,7 @@
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:frontend": "vite",
     "dev:backend": "cd backend && nodemon src/server.ts",
-    "build": "npm run build:frontend",
+    "build": "echo 'Backend-only deployment - no build needed'",
     "build:backend": "cd backend && tsc",
     "build:frontend": "tsc && vite build",
     "build:frontend:production": "tsc && vite build --mode production",
