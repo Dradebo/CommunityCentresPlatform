@@ -3,6 +3,7 @@ import { body, validationResult } from 'express-validator';
 import prisma from '../config/database';
 import { AuthRequest } from '../types';
 import { authenticateToken, requireAdmin } from '../middleware/auth';
+import { emitRealtimeEvent } from '../utils/eventStore';
 
 const router = Router();
 
@@ -77,6 +78,18 @@ router.post('/contact', [
         inquiryType,
         status: 'PENDING'
       }
+    });
+
+    // Emit real-time event for admin notifications
+    emitRealtimeEvent('new-contact-message', {
+      id: contactMessage.id,
+      centerName: center.name,
+      centerId: contactMessage.centerId,
+      senderName: contactMessage.senderName,
+      senderEmail: contactMessage.senderEmail,
+      subject: contactMessage.subject,
+      inquiryType: contactMessage.inquiryType,
+      timestamp: contactMessage.createdAt
     });
 
     res.status(201).json({
@@ -281,6 +294,17 @@ router.post('/threads/:threadId/messages', [
         lastActivity: new Date(),
         messageCount: { increment: 1 }
       }
+    });
+
+    // Emit real-time event for new message
+    emitRealtimeEvent('new-message', {
+      id: message.id,
+      threadId: message.threadId,
+      senderId: message.senderId,
+      senderName: senderCenter.name,
+      content: message.content,
+      timestamp: message.createdAt,
+      read: message.read
     });
 
     res.status(201).json({

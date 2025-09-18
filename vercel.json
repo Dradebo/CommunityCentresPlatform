@@ -1,12 +1,20 @@
 {
-  "buildCommand": "npm run build:frontend",
-  "outputDirectory": "dist",
-  "installCommand": "npm install",
-  "framework": null,
-  "rewrites": [
+  "version": 2,
+  "builds": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
+      "src": "backend/api/index.ts",
+      "use": "@vercel/node"
     }
-  ]
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "backend/api/index.ts"
+    }
+  ],
+  "functions": {
+    "backend/api/index.ts": {
+      "includeFiles": "backend/prisma/**"
+    }
+  }
 }

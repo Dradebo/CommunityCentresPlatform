@@ -3,6 +3,7 @@ import { body, query, validationResult } from 'express-validator';
 import prisma from '../config/database';
 import { AuthRequest, FilterCriteria } from '../types';
 import { authenticateToken, requireAdmin } from '../middleware/auth';
+import { emitRealtimeEvent } from '../utils/eventStore';
 
 const router = Router();
 
@@ -264,6 +265,14 @@ router.patch('/:id/verify', [authenticateToken, requireAdmin], async (req: AuthR
     const center = await prisma.communityCenter.update({
       where: { id },
       data: { verified: true }
+    });
+
+    // Emit real-time event for center verification
+    emitRealtimeEvent('center-updated', {
+      id: center.id,
+      name: center.name,
+      verified: center.verified,
+      action: 'verified'
     });
 
     res.json({

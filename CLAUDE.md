@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a full-stack web application for mapping and connecting community centers in Kampala, Uganda. The platform enables role-based access, real-time messaging between centers, and comprehensive management of community center information.
 
+**Important**: This is a monorepo where frontend and backend are in the same repository. The frontend runs from the project root, while backend code is in the `backend/` directory.
+
 ## Architecture Overview
 
 ### Frontend (React + TypeScript)
@@ -33,30 +35,47 @@ This is a full-stack web application for mapping and connecting community center
 
 ## Essential Commands
 
-### Frontend Development
+### Development (Full Stack)
 ```bash
-npm install                 # Install dependencies
-npm run dev                # Start development server (http://localhost:3000)
-npm run build              # Build for production
-npm run lint               # Run ESLint with auto-fix
-npm run type-check         # TypeScript type checking without emit
+npm install                 # Install all dependencies (frontend + backend)
+npm run dev                # Start both frontend and backend in parallel
+npm run dev:frontend      # Start only frontend (Vite dev server on :3000)
+npm run dev:backend       # Start only backend (nodemon on :3001)
 ```
 
-### Backend Development
+### Build & Production
+```bash
+npm run build             # Build backend only (for Railway deployment)
+npm run build:frontend    # Build frontend only (tsc + vite build)
+npm run build:production  # Build both frontend and backend
+npm start                 # Start production backend server
+```
+
+### Code Quality
+```bash
+npm run lint              # ESLint with auto-fix for entire project
+npm run type-check        # TypeScript checking without emit
+```
+
+### Database Operations (from project root)
+```bash
+npm run db:generate       # Generate Prisma client after schema changes
+npm run db:push          # Push schema to development database
+npm run db:migrate       # Run migrations (production)
+npm run db:seed          # Seed database with sample data
+```
+
+### Default Credentials (After Seeding)
+- **Administrator**: `admin@kampalacenters.org` / `admin123`
+- **Visitor**: `visitor@example.com` / `visitor123`
+
+### Backend-Only Commands (from backend/ directory)
 ```bash
 cd backend
-npm install                # Install backend dependencies
-npm run dev                # Start development server (http://localhost:3001)
-npm run build              # Compile TypeScript to dist/
-npm start                  # Run production server from dist/
-```
-
-### Database Operations (from backend/)
-```bash
-npm run db:generate        # Generate Prisma client after schema changes
-npm run db:push           # Push schema changes to database (development)
-npm run db:migrate        # Create and run migrations (production)
-npm run db:seed           # Seed database with sample data
+npm run dev              # Start backend with nodemon
+npm run build            # Compile TypeScript to dist/
+npm start                # Run compiled production server
+npm run db:migrate       # Create and run new migration (development)
 ```
 
 ## Environment Configuration
@@ -76,6 +95,8 @@ NODE_ENV="development"
 FRONTEND_URL="http://localhost:3000"
 ```
 
+**Production Note**: In production, update `FRONTEND_URL` to your deployed frontend domain and ensure `DATABASE_URL` points to your production database.
+
 ## Authentication Flow
 
 The app uses a centralized authentication pattern:
@@ -93,17 +114,47 @@ Socket.io events managed through `services/socket.ts`:
 - **Updates**: Live center verification and connection status changes
 - **Notifications**: Admin notifications for contact messages
 
-## Railway Deployment
-
-### Backend Deployment
-- Uses `backend/railway.toml` configuration
-- Automatic PostgreSQL database provisioning
-- Health check endpoint: `/api/health`
-- Environment variables required: `JWT_SECRET`, `FRONTEND_URL`
+## Deployment Options
 
 ### Frontend Deployment
-- Static build deployable to any CDN/hosting service
-- Update `VITE_API_URL` to deployed backend URL
+
+#### Vercel (Recommended)
+- Deploy directly from Git repository
+- Automatic builds on push to main branch
+- Set `VITE_API_URL` environment variable to backend URL
+- Build command: `npm run build:frontend`
+- Output directory: `dist`
+
+#### cPanel/Shared Hosting
+- Build locally: `npm run build:frontend`
+- Upload `dist/` folder contents to public_html
+- Ensure `.htaccess` includes SPA routing rules for React Router
+
+#### Personal VPS/Server
+- Build: `npm run build:frontend`
+- Serve with nginx, Apache, or static file server
+- Configure reverse proxy if serving backend from same domain
+
+### Backend Deployment
+
+#### Personal VPS/Server
+- Install Node.js 18+ and PostgreSQL
+- Clone repository and run `npm install` in backend/
+- Set environment variables in `.env` file
+- Run migrations: `npm run db:migrate`
+- Start with PM2: `pm2 start dist/server.js`
+
+#### cPanel Node.js Hosting
+- Upload backend files and run `npm install`
+- Configure Node.js app in cPanel
+- Import database schema and run migrations
+- Set environment variables in cPanel interface
+
+#### Environment Variables Required
+- `DATABASE_URL` - PostgreSQL connection string
+- `JWT_SECRET` - Secure random string for JWT signing
+- `FRONTEND_URL` - Your frontend domain for CORS
+- `NODE_ENV` - Set to "production"
 
 ## State Management Pattern
 
@@ -135,10 +186,10 @@ The app uses React Context + hooks pattern:
 4. Update TypeScript interfaces to match new schema
 
 ### Adding Real-time Features
-1. Add event handlers in `backend/src/utils/socket.ts`
-2. Emit events from API route handlers
-3. Add event listeners in `services/socket.ts`
-4. Update component state on socket events
+1. Add event handlers in `backend/src/utils/socket.ts` (server-side Socket.io handlers)
+2. Emit events from API route handlers using `io.emit()` or `socket.emit()`
+3. Add event listeners in `services/socket.ts` (client-side Socket.io listeners)
+4. Update component state on socket events received
 
 ## Security Considerations
 
