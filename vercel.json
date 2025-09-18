@@ -1,13 +1,7 @@
 {
   "functions": {
-    "backend/api/index.ts": {
+    "api/index.ts": {
       "includeFiles": "backend/prisma/**"
     }
-  },
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/backend/api/index.ts"
-    }
-  ]
+  }
 }

@@ -6,10 +6,10 @@ import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 
 // Import your routes
-import authRoutes from '../src/routes/auth';
-import centerRoutes from '../src/routes/centers';
-import messageRoutes from '../src/routes/messages';
-import eventRoutes from '../src/routes/events';
+import authRoutes from '../backend/src/routes/auth';
+import centerRoutes from '../backend/src/routes/centers';
+import messageRoutes from '../backend/src/routes/messages';
+import eventRoutes from '../backend/src/routes/events';
 
 // Load environment variables
 dotenv.config({ path: '../.env' });
