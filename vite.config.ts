@@ -5,7 +5,7 @@ import path from 'path';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/hub/', // Use absolute path for cPanel subdirectory
+  base: '/', // Use '/' for local dev, change to '/hub/' for cPanel deployment
   resolve: {
     alias: {
       '@': path.resolve(__dirname, '.'),

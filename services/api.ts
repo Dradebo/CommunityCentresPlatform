@@ -117,7 +117,7 @@ class APIService {
       });
     }
     
-    const response = await fetch(`${API_BASE_URL}/centers?${params}`, {
+    const response = await fetch(`${API_BASE_URL}/centers/?${params}`, {
       headers: this.getAuthHeaders(),
     });
     

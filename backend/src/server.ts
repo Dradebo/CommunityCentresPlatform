@@ -57,6 +57,9 @@ const app = express();
 const httpServer = createServer(app);
 console.log('✅ Express app created');
 
+// Trust proxy when running behind a load balancer (ALB/NLB)
+app.set('trust proxy', 1);
+
 // Initialize Socket.IO
 console.log('🔌 Initializing Socket.IO...');
 try {
@@ -97,7 +100,31 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 console.log('✅ Middleware setup complete');
 
-// Health check endpoint
+// Structured request logging (lightweight)
+app.use((req, res, next) => {
+  const startTimeMs = Date.now();
+  const { method, originalUrl } = req;
+  const requestId = (req.headers['x-request-id'] as string) || '';
+  res.on('finish', () => {
+    const durationMs = Date.now() - startTimeMs;
+    const logEntry = {
+      level: 'info',
+      message: 'http_request',
+      method,
+      path: originalUrl,
+      statusCode: res.statusCode,
+      durationMs,
+      requestId,
+      userAgent: req.headers['user-agent'] || '',
+      ip: req.ip,
+    };
+    // Log as single-line JSON for CloudWatch
+    console.log(JSON.stringify(logEntry));
+  });
+  next();
+});
+
+// Health check endpoints (for humans and ALB)
 app.get('/api/health', (req, res) => {
   res.status(200).json({ 
     status: 'OK', 
@@ -106,6 +133,11 @@ app.get('/api/health', (req, res) => {
     environment: process.env.NODE_ENV || 'development',
     port: PORT
   });
+});
+
+// Minimal healthz for ALB target group
+app.get('/healthz', (_req, res) => {
+  res.status(200).send('ok');
 });
 
 // API routes - wrapped in try-catch to handle import errors

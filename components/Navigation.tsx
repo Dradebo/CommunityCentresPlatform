@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
+import { ThemeToggle } from './ThemeToggle';
 import { MapPin, Shield, Plus, Map, MessageSquare, User, LogOut } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -54,17 +55,17 @@ export function Navigation({ currentView, setCurrentView, user, onAuthRequired }
   };
 
   return (
-    <nav className="bg-white shadow-sm border-b">
+    <nav className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 transition-colors">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <MapPin className="h-6 w-6 text-blue-600" />
-              <span className="text-xl">Kampala Centers</span>
+              <MapPin className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              <span className="text-xl font-semibold dark:text-white">Kampala Centers</span>
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 md:space-x-4">
             <div className="hidden md:flex items-center space-x-4">
               <Button
                 variant={currentView === 'map' ? 'default' : 'ghost'}
@@ -102,6 +103,8 @@ export function Navigation({ currentView, setCurrentView, user, onAuthRequired }
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
+
+            <ThemeToggle />
 
             {user ? (
               <div className="flex items-center space-x-2">

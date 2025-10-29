@@ -9,14 +9,20 @@ import { CenterMessaging } from './components/CenterMessaging';
 import { LoginForm } from './components/auth/LoginForm';
 import { RegisterForm } from './components/auth/RegisterForm';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { Button } from './components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card';
 import { Badge } from './components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './components/ui/dialog';
-import { Alert, AlertDescription } from './components/ui/alert';
 import { MapPin, Users, Building, CheckCircle, Filter, Loader2 } from 'lucide-react';
 import { apiService } from './services/api';
-import { socketService } from './services/socket';
+import { eventsService } from './services/events';
+import { Toaster, toast } from 'sonner';
+import { EmptyState } from './components/EmptyState';
+import { CenterCard } from './components/CenterCard';
+import { MapSkeleton } from './components/skeletons/MapSkeleton';
+import { CenterCardSkeletonGrid } from './components/skeletons/CenterCardSkeleton';
+import { StatCardSkeletonRow } from './components/skeletons/StatCardSkeleton';
 
 interface CommunityCenterData {
   id: string;
@@ -95,14 +101,16 @@ function AppContent() {
   const [centerMessages, setCenterMessages] = useState<CenterMessage[]>([]);
   const [communityCenters, setCommunityCenters] = useState<CommunityCenterData[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
-  // Replace the hardcoded centers with dynamic loading
+  // Load centers for everyone (public access), admin data only for authenticated users
   useEffect(() => {
+    // Load centers for all users (no authentication required)
+    loadCenters();
+
+    // Only load admin-specific data if authenticated
     if (isAuthenticated) {
-      loadCenters();
       loadContactMessages();
     }
   }, [isAuthenticated]);
@@ -110,12 +118,18 @@ function AppContent() {
   const loadCenters = async (filters?: any) => {
     try {
       setLoading(true);
-      setError(null);
       const response = await apiService.getCenters(filters);
       setCommunityCenters(response.centers);
       setFilteredCenters(response.centers);
     } catch (err: any) {
-      setError(err.message || 'Failed to load centers');
+      const errorMessage = err.message || 'Failed to load centers';
+      toast.error('Loading Failed', {
+        description: errorMessage,
+        action: {
+          label: 'Retry',
+          onClick: () => loadCenters(filters),
+        },
+      });
       console.error('Error loading centers:', err);
     } finally {
       setLoading(false);
@@ -133,23 +147,23 @@ function AppContent() {
     }
   };
 
-  // Socket.io event listeners
+  // SSE event listeners
   useEffect(() => {
-    if (isAuthenticated && socketService.isConnected()) {
-      // Listen for real-time updates
-      socketService.onNewContactMessage((message) => {
-        setContactMessages(prev => [...prev, message]);
-      });
-
-      socketService.onCenterUpdate((update) => {
-        loadCenters(activeFilters);
-      });
-
+    const setup = async () => {
+      if (!isAuthenticated) return;
+      if (!eventsService.isConnected()) {
+        await eventsService.connect();
+      }
+      eventsService.onCenterUpdate(() => { loadCenters(activeFilters); });
+      // If you emit contact messages via SSE, wire here:
+      // eventsService.onNewMessage((message) => setContactMessages(prev => [...prev, message]));
       return () => {
-        socketService.offNewContactMessage();
-        socketService.offCenterUpdate();
+        eventsService.offCenterUpdate();
+        // eventsService.offNewMessage();
       };
-    }
+    };
+    const p = setup();
+    return () => { void p; };
   }, [isAuthenticated, activeFilters]);
 
   // Initialize filtered centers
@@ -170,31 +184,47 @@ function AppContent() {
         email: centerData.contactInfo.email,
         website: centerData.contactInfo.website
       });
+      toast.success('Center Created', {
+        description: `${centerData.name} has been added to the network`,
+      });
       // Refresh centers list
       await loadCenters(activeFilters);
+      setCurrentView('map');
     } catch (err: any) {
-      setError(err.message || 'Failed to add center');
+      toast.error('Failed to Create Center', {
+        description: err.message || 'Unable to create center. Please try again.',
+      });
     }
   };
 
   const handleVerifyCenter = async (centerId: string) => {
     try {
       await apiService.verifyCenter(centerId);
+      toast.success('Center Verified', {
+        description: 'The center has been successfully verified',
+      });
       // Refresh centers list
       await loadCenters(activeFilters);
       await loadContactMessages();
     } catch (err: any) {
-      setError(err.message || 'Failed to verify center');
+      toast.error('Verification Failed', {
+        description: err.message || 'Unable to verify center',
+      });
     }
   };
 
   const handleConnectCenters = async (center1Id: string, center2Id: string) => {
     try {
       await apiService.connectCenters(center1Id, center2Id);
+      toast.success('Centers Connected', {
+        description: 'The centers have been successfully connected',
+      });
       // Refresh centers list
       await loadCenters(activeFilters);
     } catch (err: any) {
-      setError(err.message || 'Failed to connect centers');
+      toast.error('Connection Failed', {
+        description: err.message || 'Unable to connect centers',
+      });
     }
   };
 
@@ -219,18 +249,26 @@ function AppContent() {
         message: messageData.message,
         inquiryType: messageData.inquiryType
       });
+      toast.success('Message Sent', {
+        description: 'Your message has been sent successfully',
+      });
       // Refresh contact messages if admin
       if (isAdmin) {
         await loadContactMessages();
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to send message');
+      toast.error('Failed to Send Message', {
+        description: err.message || 'Unable to send your message. Please try again.',
+      });
     }
   };
 
   const handleSendCenterMessage = async (threadId: string, content: string) => {
     try {
       await apiService.sendThreadMessage(threadId, content);
+      toast.success('Message Sent', {
+        description: 'Your message has been delivered',
+      });
       // Reload messages for this thread
       if (selectedCenter) {
         const response = await apiService.getMessageThreads(selectedCenter);
@@ -240,7 +278,9 @@ function AppContent() {
         setCenterMessages(messagesResponse.messages);
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to send message');
+      toast.error('Failed to Send Message', {
+        description: err.message || 'Unable to send message',
+      });
     }
   };
 
@@ -251,13 +291,18 @@ function AppContent() {
         subject,
         initialMessage
       });
+      toast.success('Thread Created', {
+        description: 'New message thread has been created successfully',
+      });
       // Reload threads
       if (selectedCenter) {
         const response = await apiService.getMessageThreads(selectedCenter);
         setMessageThreads(response.threads);
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to create message thread');
+      toast.error('Failed to Create Thread', {
+        description: err.message || 'Unable to create message thread',
+      });
     }
   };
 
@@ -275,74 +320,60 @@ function AppContent() {
     return action;
   };
 
-  // Show loading spinner during auth check
+  // Show loading spinner during initial auth check
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p>Loading...</p>
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center space-y-4 animate-fade-in">
+          <Loader2 className="h-12 w-12 animate-spin text-primary-600 mx-auto" />
+          <p className="text-gray-700 font-medium">Loading Community Centers...</p>
         </div>
       </div>
     );
   }
 
-  // Show authentication dialog for non-authenticated users
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full space-y-6">
-          <div className="text-center">
-            <h1 className="text-2xl mb-2">Kampala Community Centers Network</h1>
-            <p className="text-gray-600">Connect with community centers across Kampala</p>
-          </div>
-          {authMode === 'login' ? (
-            <LoginForm 
-              onSwitchToRegister={() => setAuthMode('register')}
-            />
-          ) : (
-            <RegisterForm 
-              onSwitchToLogin={() => setAuthMode('login')}
-            />
-          )}
-        </div>
-      </div>
-    );
-  }
-
+  // Main app - PUBLIC ACCESS (no auth wall)
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation 
+      {/* Toast Notifications */}
+      <Toaster position="top-right" richColors closeButton expand={false} />
+
+      {/* Auth Modal Dialog */}
+      <Dialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {authMode === 'login' ? 'Sign In' : 'Create Account'}
+            </DialogTitle>
+          </DialogHeader>
+          {authMode === 'login' ? (
+            <LoginForm
+              onSwitchToRegister={() => setAuthMode('register')}
+              onClose={() => setShowAuthDialog(false)}
+            />
+          ) : (
+            <RegisterForm
+              onSwitchToLogin={() => setAuthMode('login')}
+              onClose={() => setShowAuthDialog(false)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Navigation
         currentView={currentView}
         setCurrentView={setCurrentView}
         user={user}
         onAuthRequired={handleAuthRequired}
       />
       
-      {error && (
-        <div className="container mx-auto px-4 pt-4">
-          <Alert variant="destructive">
-            <AlertDescription>
-              {error}
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setError(null)}
-                className="ml-2"
-              >
-                Dismiss
-              </Button>
-            </AlertDescription>
-          </Alert>
-        </div>
-      )}
       
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         {currentView === 'map' && (
           <div>
-            <div className="mb-8">
-              <h1 className="text-3xl mb-4">Kampala Community Centers Network</h1>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div className="mb-6 lg:mb-8">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl mb-3 sm:mb-4">Kampala Community Centers Network</h1>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm">Total Centers</CardTitle>
@@ -390,12 +421,9 @@ function AppContent() {
             />
             
             {loading ? (
-              <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-                <p>Loading community centers...</p>
-              </div>
+              <MapSkeleton />
             ) : (
-              <MapComponent 
+              <MapComponent
                 centers={centersToDisplay}
                 onCenterSelect={(centerId) => {
                   setSelectedCenter(centerId);
@@ -404,52 +432,48 @@ function AppContent() {
               />
             )}
             
-            <div className="mt-8">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl">Community Centers Directory</h2>
+            <div className="mt-6 sm:mt-8">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                <h2 className="text-lg sm:text-xl font-semibold">Community Centers Directory</h2>
                 {centersToDisplay.length !== communityCenters.length && (
                   <Badge variant="outline">
                     Showing {centersToDisplay.length} of {communityCenters.length} centers
                   </Badge>
                 )}
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {centersToDisplay.map(center => (
-                  <Card key={center.id} className="cursor-pointer hover:shadow-lg transition-shadow"
-                        onClick={() => {
-                          setSelectedCenter(center.id);
-                          setCurrentView('center-detail');
-                        }}>
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <CardTitle className="text-lg">{center.name}</CardTitle>
-                        {center.verified && <Badge variant="default">Verified</Badge>}
-                      </div>
-                      <p className="text-sm text-gray-600 flex items-center">
-                        <MapPin className="h-4 w-4 mr-1" />
-                        {center.location}
-                      </p>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm mb-3">{center.description}</p>
-                      <div className="flex flex-wrap gap-2">
-                        {center.services.slice(0, 3).map(service => (
-                          <Badge key={service} variant="secondary">{service}</Badge>
-                        ))}
-                        {center.services.length > 3 && (
-                          <Badge variant="outline">+{center.services.length - 3} more</Badge>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-              {centersToDisplay.length === 0 && (
-                <div className="text-center py-12">
-                  <Filter className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <h3 className="text-lg mb-2">No centers found</h3>
-                  <p className="text-gray-600">Try adjusting your search criteria or filters.</p>
+              {loading ? (
+                <CenterCardSkeletonGrid count={6} />
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
+                  {centersToDisplay.map(center => (
+                    <CenterCard
+                      key={center.id}
+                      center={center}
+                      onClick={() => {
+                        setSelectedCenter(center.id);
+                        setCurrentView('center-detail');
+                      }}
+                    />
+                  ))}
                 </div>
+              )}
+              {centersToDisplay.length === 0 && (
+                <EmptyState
+                  icon={Filter}
+                  title="No centers found"
+                  description="Try adjusting your search criteria or filters to find community centers."
+                  action={{
+                    label: 'Clear Filters',
+                    onClick: () => handleFilterChange([], {
+                      searchQuery: '',
+                      selectedServices: [],
+                      selectedLocations: [],
+                      verificationStatus: 'all',
+                      connectionStatus: 'all',
+                      addedBy: 'all'
+                    })
+                  }}
+                />
               )}
             </div>
           </div>
@@ -539,9 +563,11 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

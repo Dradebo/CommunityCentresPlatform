@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { apiService } from '../services/api';
-import { socketService } from '../services/socket';
+import { eventsService } from '../services/events';
 
 interface User {
   id: string;
@@ -54,10 +54,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const response = await apiService.getCurrentUser();
         setUser(response.user);
         
-        // Connect to socket
+        // Connect to SSE stream
         const token = localStorage.getItem('auth_token');
         if (token) {
-          await socketService.connect(token);
+          await eventsService.connect();
         }
       }
     } catch (error) {
@@ -74,10 +74,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await apiService.login({ email, password });
       setUser(response.user);
       
-      // Connect to socket
+      // Connect to SSE stream
       const token = localStorage.getItem('auth_token');
       if (token) {
-        await socketService.connect(token);
+        await eventsService.connect();
       }
     } catch (error) {
       throw error;
@@ -93,11 +93,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const response = await apiService.register(userData);
       setUser(response.user);
-      
-      // Connect to socket
+
+      // Connect to SSE stream
       const token = localStorage.getItem('auth_token');
       if (token) {
-        await socketService.connect(token);
+        await eventsService.connect();
       }
     } catch (error) {
       throw error;
@@ -106,7 +106,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = () => {
     apiService.logout();
-    socketService.disconnect();
+    eventsService.disconnect();
     setUser(null);
   };
 

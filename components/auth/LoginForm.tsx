@@ -112,8 +112,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister, onClos
           <div className="border-t pt-4 mt-4">
             <div className="text-xs text-gray-500 space-y-1">
               <p><strong>Demo Accounts:</strong></p>
-              <p>Admin: admin@kampalacenters.org / admin123</p>
-              <p>Visitor: visitor@example.com / visitor123</p>
+              <p>Admin: admin@test.com / admin123</p>
+              <p>Manager: manager@test.com / admin123</p>
             </div>
           </div>
         </form>
