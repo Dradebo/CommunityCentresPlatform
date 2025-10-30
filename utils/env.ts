@@ -11,5 +11,5 @@ export const getEnvVar = (key: string, defaultValue: string): string => {
   }
 };
 
-export const API_BASE_URL = getEnvVar('VITE_API_URL', 'http://localhost:3001/api');
-export const SOCKET_URL = getEnvVar('VITE_API_URL', 'http://localhost:3001').replace('/api', '');
+export const API_BASE_URL = getEnvVar('VITE_API_URL', 'http://localhost:8080/api');
+export const SOCKET_URL = getEnvVar('VITE_API_URL', 'http://localhost:8080').replace('/api', '');

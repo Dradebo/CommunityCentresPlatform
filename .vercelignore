@@ -9,6 +9,9 @@ node_modules/
 prisma/
 **/prisma/
 
+# API directory (deprecated serverless functions)
+api/
+
 # Environment files
 .env
 .env.local
