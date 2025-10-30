@@ -1,0 +1,45 @@
+# Exclude deprecated backend and Go backend from Vercel deployment
+backend/
+go-backend/
+
+# Node modules
+node_modules/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# Build artifacts
+dist/
+.cache/
+
+# Development files
+.DS_Store
+.vscode/
+.idea/
+
+# Test files
+coverage/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# Documentation
+*.md
+!README.md
+
+# Git
+.git/
+.gitignore
+
+# Beads and project management
+.beads/
+.github/
+.cursor/
+.clinerules/
