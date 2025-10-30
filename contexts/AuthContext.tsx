@@ -6,7 +6,7 @@ interface User {
   id: string;
   email: string;
   name: string;
-  role: 'ADMIN' | 'CENTER_MANAGER' | 'VISITOR';
+  role: 'ADMIN' | 'CENTER_MANAGER' | 'VISITOR' | 'ENTREPRENEUR';
   verified: boolean;
 }
 
@@ -18,12 +18,13 @@ interface AuthContextType {
     email: string;
     password: string;
     name: string;
-    role?: 'VISITOR' | 'CENTER_MANAGER';
+    role?: 'VISITOR' | 'CENTER_MANAGER' | 'ENTREPRENEUR';
   }) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
   isCenterManager: boolean;
+  isEntrepreneur: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -88,7 +89,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     email: string;
     password: string;
     name: string;
-    role?: 'VISITOR' | 'CENTER_MANAGER';
+    role?: 'VISITOR' | 'CENTER_MANAGER' | 'ENTREPRENEUR';
   }) => {
     try {
       const response = await apiService.register(userData);
@@ -118,7 +119,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     isAuthenticated: !!user,
     isAdmin: user?.role === 'ADMIN',
-    isCenterManager: user?.role === 'CENTER_MANAGER' || user?.role === 'ADMIN'
+    isCenterManager: user?.role === 'CENTER_MANAGER' || user?.role === 'ADMIN',
+    isEntrepreneur: user?.role === 'ENTREPRENEUR'
   };
 
   return (

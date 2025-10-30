@@ -19,7 +19,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin, onC
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'VISITOR' as 'VISITOR' | 'CENTER_MANAGER'
+    role: 'VISITOR' as 'VISITOR' | 'CENTER_MANAGER' | 'ENTREPRENEUR'
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -115,18 +115,21 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin, onC
           
           <div className="space-y-2">
             <Label htmlFor="role">Account Type</Label>
-            <Select value={formData.role} onValueChange={(value: 'VISITOR' | 'CENTER_MANAGER') => handleInputChange('role', value)}>
+            <Select value={formData.role} onValueChange={(value: 'VISITOR' | 'CENTER_MANAGER' | 'ENTREPRENEUR') => handleInputChange('role', value)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="VISITOR">Visitor</SelectItem>
                 <SelectItem value="CENTER_MANAGER">Center Manager</SelectItem>
+                <SelectItem value="ENTREPRENEUR">Entrepreneur</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-xs text-gray-500">
-              {formData.role === 'CENTER_MANAGER' 
+              {formData.role === 'CENTER_MANAGER'
                 ? 'Center managers need admin approval to access management features'
+                : formData.role === 'ENTREPRENEUR'
+                ? 'Entrepreneurs can register their business and enroll in community center programs'
                 : 'Visitors can browse centers and send messages'
               }
             </p>

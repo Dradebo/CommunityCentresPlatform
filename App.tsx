@@ -8,6 +8,9 @@ import { SearchAndFilter } from './components/SearchAndFilter';
 import { CenterMessaging } from './components/CenterMessaging';
 import { LoginForm } from './components/auth/LoginForm';
 import { RegisterForm } from './components/auth/RegisterForm';
+import { EntrepreneurRegistrationForm } from './components/entrepreneur/EntrepreneurRegistrationForm';
+import { EntrepreneurDashboard } from './components/entrepreneur/EntrepreneurDashboard';
+import { EntrepreneurProfile } from './components/entrepreneur/EntrepreneurProfile';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { Button } from './components/ui/button';
@@ -85,7 +88,7 @@ interface MessageThread {
 
 function AppContent() {
   const { user, loading: authLoading, isAdmin, isAuthenticated } = useAuth();
-  const [currentView, setCurrentView] = useState<'map' | 'admin' | 'add-center' | 'center-detail' | 'messages'>('map');
+  const [currentView, setCurrentView] = useState<'map' | 'admin' | 'add-center' | 'center-detail' | 'messages' | 'entrepreneur-dashboard' | 'entrepreneur-profile' | 'entrepreneur-register'>('map');
   const [selectedCenter, setSelectedCenter] = useState<string | null>(null);
   const [filteredCenters, setFilteredCenters] = useState<CommunityCenterData[]>([]);
   const [activeFilters, setActiveFilters] = useState<FilterCriteria>({
@@ -522,7 +525,7 @@ function AppContent() {
             {!selectedCenter && (
               <div className="mb-6">
                 <label className="block text-sm mb-2">Select a verified center to manage messages for:</label>
-                <select 
+                <select
                   className="border rounded-md px-3 py-2"
                   onChange={(e) => setSelectedCenter(e.target.value)}
                 >
@@ -535,7 +538,7 @@ function AppContent() {
                 </select>
               </div>
             )}
-            
+
             {selectedCenter && (
               <div>
                 <div className="mb-4 flex items-center justify-between">
@@ -555,6 +558,31 @@ function AppContent() {
               </div>
             )}
           </div>
+        )}
+
+        {currentView === 'entrepreneur-dashboard' && user && user.role === 'ENTREPRENEUR' && (
+          <EntrepreneurDashboard userId={user.id} />
+        )}
+
+        {currentView === 'entrepreneur-profile' && user && user.role === 'ENTREPRENEUR' && (
+          <div>
+            <Button
+              variant="outline"
+              onClick={() => setCurrentView('entrepreneur-dashboard')}
+              className="mb-4"
+            >
+              ← Back to Dashboard
+            </Button>
+            <EntrepreneurProfile entrepreneurId={user.id} />
+          </div>
+        )}
+
+        {currentView === 'entrepreneur-register' && user && user.role === 'ENTREPRENEUR' && (
+          <EntrepreneurRegistrationForm
+            userId={user.id}
+            onComplete={() => setCurrentView('entrepreneur-dashboard')}
+            onCancel={() => setCurrentView('map')}
+          />
         )}
       </main>
     </div>

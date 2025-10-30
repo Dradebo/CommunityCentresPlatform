@@ -8,7 +8,7 @@ Full-stack web application for mapping and connecting community centers in Kampa
 
 ## Project Structure
 
-**Monorepo Layout**: This is a monorepo with the frontend at the project root and backends in subdirectories:
+**Monorepo Layout**: Frontend at project root, Go backend in subdirectory:
 
 ```
 CommunityCentresPlatform/
@@ -19,8 +19,8 @@ CommunityCentresPlatform/
 ├── utils/               # Frontend utility functions
 ├── App.tsx              # Main React application entry point
 ├── vite.config.ts       # Vite build configuration
-├── backend/             # ⚠️ DEPRECATED Node.js backend (DO NOT USE)
-└── go-backend/          # ✅ Current production Go backend
+├── vercel.json          # Vercel deployment configuration (frontend-only)
+└── go-backend/          # ✅ Production Go backend (deployed separately to Railway)
     ├── cmd/server/      # Go application entry point
     ├── internal/        # Go internal packages
     │   ├── auth/        # JWT authentication
@@ -31,7 +31,7 @@ CommunityCentresPlatform/
     └── Dockerfile       # Production Docker image
 ```
 
-**Important**: The `backend/` directory contains deprecated Node.js code. All new backend work must be done in `go-backend/`.
+**Important**: Frontend and backend are deployed separately - Vercel for frontend, Railway for backend.
 
 ## Architecture Overview
 
@@ -47,14 +47,11 @@ CommunityCentresPlatform/
 
 ### Backend Architecture
 
-**Current Backend**: Go (Gin framework) with GORM ORM and PostgreSQL
+**Production Backend**: Go (Gin framework) with GORM ORM and PostgreSQL
 - Location: `go-backend/` directory
 - Features: JWT auth, RESTful API, SSE real-time events
-- Deployment: AWS ECS Fargate (containerized)
-
-**Legacy Backend**: Node.js/Express (deprecated, in `backend/` directory)
-- DO NOT make changes to the Node.js backend unless specifically requested
-- The Node.js backend is no longer maintained or deployed
+- Deployment: Railway with PostgreSQL addon
+- Database: PostgreSQL (Railway managed service)
 
 ### Key Data Models (Go Backend)
 
@@ -118,16 +115,18 @@ CommunityCentresPlatform/
 
 ## Essential Commands
 
-### Frontend Development
+### Frontend Development (Root Directory)
 ```bash
 npm install              # Install frontend dependencies
-npm run dev:frontend     # Start Vite dev server on http://localhost:3000
-npm run build:frontend   # Build frontend for production (outputs to dist/)
+npm run dev              # Start Vite dev server on http://localhost:3000
+npm run build            # Build frontend for production (outputs to dist/)
+npm run build:production # Build with production environment variables
+npm run preview          # Preview production build locally
 npm run lint             # Run ESLint with auto-fix
 npm run type-check       # TypeScript type checking without emit
 ```
 
-### Go Backend (Current Production Backend)
+### Go Backend (go-backend/ Directory)
 ```bash
 cd go-backend
 
@@ -139,7 +138,7 @@ go run cmd/server/main.go  # Start dev server on http://localhost:8080
 go build -o bin/server ./cmd/server  # Build production binary
 ./bin/server              # Run production server
 
-# Docker
+# Docker (Local Development)
 docker-compose up -d      # Start backend + PostgreSQL in Docker
 docker-compose down       # Stop Docker containers
 
@@ -161,17 +160,6 @@ cp .env.example .env      # Configure DATABASE_URL and JWT_SECRET
 # The server will auto-create tables on first run (development only)
 go run cmd/server/main.go
 ```
-
-### Node.js Backend (DEPRECATED - Do Not Use)
-```bash
-# ⚠️ WARNING: This backend is deprecated and no longer deployed
-npm run dev:backend       # Runs deprecated Node.js backend (nodemon on :3001)
-npm run db:generate       # Prisma client generation (deprecated)
-npm run db:push          # Prisma schema push (deprecated)
-npm run db:seed          # Seed database (deprecated)
-```
-
-**Note**: Use `npm run dev:backend` only if you need to maintain compatibility with old data. For all new development, use the Go backend in `go-backend/`.
 
 ### Default Test Credentials (After Database Seeding)
 
@@ -202,12 +190,16 @@ docker-compose up -d db  # Starts PostgreSQL on port 5432
 
 ### Frontend Environment (.env in project root)
 ```env
-# API endpoint - points to Go backend
+# Development (.env)
 VITE_API_URL="http://localhost:8080/api"
 
-# Production: Update to your deployed backend URL
-# VITE_API_URL="https://your-backend-domain.com/api"
+# Production (.env.production)
+# Update with your Railway backend URL before deploying to Vercel
+VITE_API_URL="https://your-railway-backend.up.railway.app/api"
+NODE_ENV="production"
 ```
+
+**Note**: Vercel automatically uses `.env.production` when building. Alternatively, set `VITE_API_URL` in Vercel dashboard under project settings → Environment Variables.
 
 ### Go Backend Environment (go-backend/.env)
 ```env
@@ -404,26 +396,57 @@ The app uses React Context + hooks pattern:
 - **Domain**: kii-impact.org/centres (subdirectory, not subdomain)
 - **DNS**: cPanel DNS configuration with CNAME or proxy rules
 
-**Deployment Configuration**:
+**Deployment Steps**:
 
-1. **Railway Backend**:
-   - Deploy Go backend container
-   - Add PostgreSQL database addon
-   - Set environment variables (DATABASE_URL, JWT_SECRET, FRONTEND_URL)
-   - Get Railway backend URL (e.g., `https://kampala-centers.up.railway.app`)
+1. **Railway Backend Deployment**:
+   ```bash
+   cd go-backend
+   # Railway will auto-detect Dockerfile and deploy
+   # Add PostgreSQL addon in Railway dashboard
+   # Set environment variables:
+   # - DATABASE_URL (from Railway PostgreSQL addon)
+   # - JWT_SECRET (generate with: openssl rand -base64 32)
+   # - FRONTEND_URL (Vercel URL or custom domain)
+   # - PORT=8080
+   # - GIN_MODE=release
+   ```
 
-2. **Vercel Frontend**:
-   - Deploy from GitHub repository (automatic on push)
-   - Set `VITE_API_URL` to Railway backend URL
-   - Set `base: '/centres/'` in [vite.config.ts](vite.config.ts) for subdirectory deployment
-   - Get Vercel URL (e.g., `https://kampala-centers.vercel.app`)
+2. **Vercel Frontend Deployment**:
+   ```bash
+   # Option 1: Connect GitHub repository in Vercel dashboard (recommended)
+   # - Vercel auto-detects Vite and uses vercel.json configuration
+   # - Set environment variable: VITE_API_URL=<Railway backend URL>/api
+   # - Deploy!
 
-3. **cPanel DNS Configuration**:
+   # Option 2: Vercel CLI (manual deployment)
+   npm install -g vercel
+   vercel --prod
+   ```
+
+3. **Post-Deployment Configuration**:
+   - Update `.env.production` with Railway backend URL
+   - In Vercel dashboard: Set `VITE_API_URL` environment variable
+   - In Railway dashboard: Set `FRONTEND_URL` to Vercel URL (for CORS)
+   - Test: Visit Vercel URL and verify API connection
+
+4. **cPanel DNS Configuration** (Optional - for custom domain):
    - Option A: CNAME record pointing `centres.kii-impact.org` to Vercel
    - Option B: Reverse proxy rule in `.htaccess` routing `/centres/*` to Vercel
    - Ensure HTTPS is configured (domain already has SSL)
 
-**Documentation**: Full step-by-step guide will be in `RAILWAY-VERCEL-DEPLOYMENT.md` (to be created during deployment phase).
+**Troubleshooting Vercel Deployment**:
+
+If you encounter Prisma errors during Vercel build:
+- Ensure `package.json` contains NO Prisma dependencies (`@prisma/client`, `prisma`)
+- Verify `vercel.json` exists with explicit Vite configuration
+- Check `.vercelignore` excludes `backend/`, `go-backend/`, `prisma/`
+- Confirm build command is `npm run build` (not custom scripts)
+
+If API requests fail in production:
+- Verify `VITE_API_URL` environment variable is set in Vercel dashboard
+- Check Railway backend is running (visit Railway URL + `/healthz`)
+- Ensure Railway `FRONTEND_URL` matches your Vercel deployment URL
+- Check browser console for CORS errors
 
 ### Alternative Deployment Options
 

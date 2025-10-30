@@ -37,7 +37,7 @@ class APIService {
     email: string;
     password: string;
     name: string;
-    role?: 'VISITOR' | 'CENTER_MANAGER';
+    role?: 'VISITOR' | 'CENTER_MANAGER' | 'ENTREPRENEUR';
   }) {
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
       method: 'POST',

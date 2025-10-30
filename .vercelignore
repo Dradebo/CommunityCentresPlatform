@@ -5,6 +5,10 @@ go-backend/
 # Node modules
 node_modules/
 
+# Prisma (deprecated - not used in this frontend-only deployment)
+prisma/
+**/prisma/
+
 # Environment files
 .env
 .env.local
