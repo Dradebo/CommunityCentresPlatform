@@ -802,3 +802,39 @@ Current beads issues track the project status:
 
 Use `bd list` to view all issues and `bd show bd-18` for detailed Phase A2-A6 plan.
 
+
+## Current Deployment State (October 2025)
+
+### Production URLs
+- **Frontend:** https://community-centres-platform.vercel.app (Vercel)
+- **Backend:** https://communitycentresplatform-production-6caf.up.railway.app (Railway)
+- **Database:** PostgreSQL on Railway
+
+### Recent Session Work (Phase 1 UI/UX Improvements) ✅ COMPLETE
+
+**1. Critical Bug Fixes:**
+- Fixed "Back to Map" button navigating to about:blank
+  - Updated [components/CommunityCenter.tsx](components/CommunityCenter.tsx) to use `onBackToMap` prop
+  - Updated [App.tsx](App.tsx) to pass proper callback function
+
+**2. Mobile Navigation Accessibility:**
+- Added `aria-label` and `title` attributes to mobile nav icon buttons
+  - Updated [components/Navigation.tsx](components/Navigation.tsx) (lines 100-112)
+
+**3. Modal Overlay & Text Contrast (User Pain Point):**
+- Increased overlay opacity from 80% to 92% with backdrop blur
+- Pure white/dark backgrounds for better content visibility
+- Strong text contrast (gray-900/white for titles, gray-600/gray-300 for descriptions)
+- Updated 4 modal components:
+  - [components/ui/dialog.tsx](components/ui/dialog.tsx)
+  - [components/ui/alert-dialog.tsx](components/ui/alert-dialog.tsx)
+  - [components/ui/sheet.tsx](components/ui/sheet.tsx)
+  - [components/ui/drawer.tsx](components/ui/drawer.tsx)
+
+**Build Status:** ✅ All changes verified, frontend compiles successfully
+
+### Next Steps: Phase 2 - Google Maps Integration
+- Replace SVG map with real Google Maps JavaScript API
+- Create LocationPicker component with draggable pin for center registration
+- Integrate Places Autocomplete for address search
+

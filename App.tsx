@@ -506,11 +506,15 @@ function AppContent() {
         )}
 
         {currentView === 'center-detail' && selectedCenter && (
-          <CommunityCenter 
+          <CommunityCenter
             center={communityCenters.find(c => c.id === selectedCenter)!}
             allCenters={communityCenters}
             onConnectCenter={handleConnectCenters}
             onSendContactMessage={handleSendContactMessage}
+            onBackToMap={() => {
+              setCurrentView('map');
+              setSelectedCenter(null);
+            }}
             isAdmin={isAdmin}
           />
         )}

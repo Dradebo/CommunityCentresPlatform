@@ -97,6 +97,8 @@ export function Navigation({ currentView, setCurrentView, user, onAuthRequired }
                 variant={currentView === 'map' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setCurrentView('map')}
+                aria-label="Map View"
+                title="Map View"
               >
                 <Map className="h-4 w-4" />
               </Button>
@@ -105,6 +107,8 @@ export function Navigation({ currentView, setCurrentView, user, onAuthRequired }
                 variant="outline"
                 size="sm"
                 onClick={() => setCurrentView('add-center')}
+                aria-label="Add Center"
+                title="Add Center"
               >
                 <Plus className="h-4 w-4" />
               </Button>

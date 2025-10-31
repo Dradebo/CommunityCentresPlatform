@@ -51,10 +51,11 @@ interface CommunityCenterProps {
   allCenters: CommunityCenterData[];
   onConnectCenter: (center1Id: string, center2Id: string) => void;
   onSendContactMessage: (message: ContactMessage) => void;
+  onBackToMap: () => void;
   isAdmin: boolean;
 }
 
-export function CommunityCenter({ center, allCenters, onConnectCenter, onSendContactMessage, isAdmin }: CommunityCenterProps) {
+export function CommunityCenter({ center, allCenters, onConnectCenter, onSendContactMessage, onBackToMap, isAdmin }: CommunityCenterProps) {
   const [connectionTarget, setConnectionTarget] = useState<string>('');
   const [showConnectionDialog, setShowConnectionDialog] = useState(false);
 
@@ -78,9 +79,9 @@ export function CommunityCenter({ center, allCenters, onConnectCenter, onSendCon
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <Button 
-        variant="ghost" 
-        onClick={() => window.history.back()}
+      <Button
+        variant="ghost"
+        onClick={onBackToMap}
         className="mb-4"
       >
         <ArrowLeft className="h-4 w-4 mr-2" />
