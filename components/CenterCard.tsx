@@ -22,12 +22,12 @@ export const CenterCard: React.FC<CenterCardProps> = ({ center, onClick }) => {
   // Determine gradient based on center status
   const getCardGradient = () => {
     if (center.verified) {
-      return 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800';
+      return 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/40 dark:to-emerald-900/40 border-green-200 dark:border-green-700';
     }
     if (center.addedBy === 'admin') {
-      return 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200 dark:border-blue-800';
+      return 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/40 dark:to-indigo-900/40 border-blue-200 dark:border-blue-700';
     }
-    return 'bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-800/50 dark:to-slate-800/50 border-gray-200 dark:border-gray-700';
+    return 'bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-800 dark:to-slate-800 border-gray-200 dark:border-gray-600';
   };
 
   const getVerifiedBadge = () => {
@@ -87,14 +87,14 @@ export const CenterCard: React.FC<CenterCardProps> = ({ center, onClick }) => {
             </Badge>
           )}
         </div>
-        <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mt-2">
+        <div className="flex items-center text-sm text-gray-600 dark:text-gray-300 mt-2">
           <MapPin className="h-4 w-4 mr-1.5 shrink-0 text-primary-500" />
           <span className="line-clamp-1">{center.location}</span>
         </div>
       </CardHeader>
 
       <CardContent className="relative z-10 space-y-4">
-        <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2 leading-relaxed">
+        <p className="text-sm text-gray-700 dark:text-gray-200 line-clamp-2 leading-relaxed">
           {center.description}
         </p>
 
@@ -104,7 +104,7 @@ export const CenterCard: React.FC<CenterCardProps> = ({ center, onClick }) => {
             <Badge
               key={service}
               variant="secondary"
-              className="text-xs font-medium bg-white/60 dark:bg-gray-700/60 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-700 transition-colors"
+              className="text-xs font-medium bg-white/60 dark:bg-gray-700 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-600 transition-colors"
               style={{
                 animationDelay: `${index * 100}ms`
               }}
@@ -121,8 +121,8 @@ export const CenterCard: React.FC<CenterCardProps> = ({ center, onClick }) => {
 
         {/* Connection indicator */}
         {hasConnections && (
-          <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 bg-white/40 dark:bg-gray-800/40 backdrop-blur-sm rounded-full px-3 py-1.5 w-fit">
-            <Users className="h-3.5 w-3.5 text-purple-500" />
+          <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-300 bg-white/40 dark:bg-gray-700 backdrop-blur-sm rounded-full px-3 py-1.5 w-fit">
+            <Users className="h-3.5 w-3.5 text-purple-500 dark:text-purple-400" />
             <span className="font-medium">
               {center.connections.length} {center.connections.length === 1 ? 'connection' : 'connections'}
             </span>
@@ -131,7 +131,7 @@ export const CenterCard: React.FC<CenterCardProps> = ({ center, onClick }) => {
 
         {/* Quality indicator for verified centers */}
         {center.verified && (
-          <div className="flex items-center gap-1.5 text-xs font-medium text-green-700 dark:text-green-400 bg-green-100/60 dark:bg-green-900/30 backdrop-blur-sm rounded-full px-3 py-1.5 w-fit">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-green-700 dark:text-green-300 bg-green-100/60 dark:bg-green-900/40 backdrop-blur-sm rounded-full px-3 py-1.5 w-fit">
             <Sparkles className="h-3.5 w-3.5" />
             <span>Verified Center</span>
           </div>

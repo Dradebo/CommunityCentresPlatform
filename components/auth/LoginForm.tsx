@@ -40,7 +40,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister, onClos
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
         <CardTitle>Welcome Back</CardTitle>
-        <p className="text-gray-600">Sign in to your account</p>
+        <p className="text-gray-600 dark:text-gray-400">Sign in to your account</p>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -96,7 +96,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister, onClos
           </Button>
           
           <div className="text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               Don't have an account?{' '}
               <Button
                 variant="link"
@@ -107,14 +107,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister, onClos
                 Sign up
               </Button>
             </p>
-          </div>
-          
-          <div className="border-t pt-4 mt-4">
-            <div className="text-xs text-gray-500 space-y-1">
-              <p><strong>Demo Accounts:</strong></p>
-              <p>Admin: admin@test.com / admin123</p>
-              <p>Manager: manager@test.com / admin123</p>
-            </div>
           </div>
         </form>
       </CardContent>
