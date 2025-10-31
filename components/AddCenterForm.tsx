@@ -5,7 +5,9 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { Checkbox } from './ui/checkbox';
-import { Plus, MapPin } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import { LocationPicker } from './LocationPicker';
+import { LatLng } from '../utils/googleMaps';
 
 interface CommunityCenterData {
   name: string;
@@ -76,11 +78,11 @@ export function AddCenterForm({ onAddCenter, isAdmin }: AddCenterFormProps) {
     }));
   };
 
-  const handleLocationSelect = (area: typeof kampalaAreas[0]) => {
+  const handleLocationSelect = (location: LatLng, address?: string) => {
     setFormData(prev => ({
       ...prev,
-      location: area.name,
-      coordinates: { lat: area.lat, lng: area.lng }
+      location: address || prev.location,
+      coordinates: { lat: location.lat, lng: location.lng }
     }));
   };
 
@@ -160,32 +162,19 @@ export function AddCenterForm({ onAddCenter, isAdmin }: AddCenterFormProps) {
               </div>
 
               <div>
-                <Label htmlFor="location">Location *</Label>
-                <div className="space-y-2">
-                  <Input
-                    id="location"
-                    value={formData.location}
-                    onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                    placeholder="Enter custom location or select from suggestions below"
-                    required
-                  />
-                  <div className="text-sm text-gray-600">Quick select:</div>
-                  <div className="flex flex-wrap gap-2">
-                    {kampalaAreas.map(area => (
-                      <Button
-                        key={area.name}
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleLocationSelect(area)}
-                        className="text-xs"
-                      >
-                        <MapPin className="h-3 w-3 mr-1" />
-                        {area.name}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
+                <Label>Location *</Label>
+                <LocationPicker
+                  initialLocation={formData.coordinates}
+                  onLocationSelect={handleLocationSelect}
+                  className="mt-2"
+                />
+                <Input
+                  className="mt-4"
+                  value={formData.location}
+                  onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                  placeholder="Location name or address"
+                  required
+                />
               </div>
 
               <div>

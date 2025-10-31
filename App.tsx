@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MapComponent } from './components/MapComponent';
+import { GoogleMap } from './components/GoogleMap';
 import { AdminDashboard } from './components/AdminDashboard';
 import { CommunityCenter } from './components/CommunityCenter';
 import { AddCenterForm } from './components/AddCenterForm';
@@ -426,12 +426,14 @@ function AppContent() {
             {loading ? (
               <MapSkeleton />
             ) : (
-              <MapComponent
+              <GoogleMap
                 centers={centersToDisplay}
+                selectedCenter={selectedCenter}
                 onCenterSelect={(centerId) => {
                   setSelectedCenter(centerId);
                   setCurrentView('center-detail');
                 }}
+                className="h-[400px] md:h-[500px] rounded-lg"
               />
             )}
             
