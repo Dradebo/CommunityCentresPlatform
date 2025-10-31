@@ -327,10 +327,10 @@ function AppContent() {
   // Show loading spinner during initial auth check
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-blue-50 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center">
         <div className="text-center space-y-4 animate-fade-in">
-          <Loader2 className="h-12 w-12 animate-spin text-primary-600 mx-auto" />
-          <p className="text-gray-700 font-medium">Loading Community Centers...</p>
+          <Loader2 className="h-12 w-12 animate-spin text-primary-600 dark:text-primary-400 mx-auto" />
+          <p className="text-gray-700 dark:text-gray-300 font-medium">Loading Community Centers...</p>
         </div>
       </div>
     );
@@ -338,7 +338,7 @@ function AppContent() {
 
   // Main app - PUBLIC ACCESS (no auth wall)
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Toast Notifications */}
       <Toaster position="top-right" richColors closeButton expand={false} />
 
