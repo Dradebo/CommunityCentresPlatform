@@ -1,18 +1,20 @@
+# Railway configuration for Go backend
+# The Go backend is in the go-backend/ directory
+
 [build]
-builder = "nixpacks"
+builder = "dockerfile"
+dockerfilePath = "go-backend/Dockerfile"
+watchPatterns = ["go-backend/**"]
 
 [deploy]
-healthcheckPath = "/api/health"
-healthcheckTimeout = 300
-restartPolicyType = "on_failure" 
+healthcheckPath = "/healthz"
+healthcheckTimeout = 100
+restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
-startCommand = "cd backend && node dist/server.js"
 
-[variables]
-NODE_ENV = "production"
-PORT = "3001"
-
-# Database will be automatically provided by Railway PostgreSQL service
-# Required environment variables to set in Railway:
-# - JWT_SECRET (generate a secure random string)
-# - FRONTEND_URL (URL of your deployed frontend)
+# Railway environment variables required (set in Railway dashboard):
+# - DATABASE_URL (auto-populated by PostgreSQL addon)
+# - JWT_SECRET (generate with: openssl rand -base64 32)
+# - FRONTEND_URL (e.g., https://community-centres-platform.vercel.app)
+# - PORT (optional, Railway auto-assigns if not set)
+# - GIN_MODE=release (recommended for production)
