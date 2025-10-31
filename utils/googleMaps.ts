@@ -1,4 +1,4 @@
-import { Loader } from '@googlemaps/js-api-loader';
+import { setOptions, importLibrary } from '@googlemaps/js-api-loader';
 
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
@@ -26,14 +26,15 @@ export const loadGoogleMaps = async (): Promise<typeof google.maps> => {
     return google.maps;
   }
 
-  const loader = new Loader({
-    apiKey: API_KEY,
-    version: 'weekly',
-    libraries: ['places', 'geometry'],
+  // Set API options (must be called before importLibrary)
+  setOptions({
+    key: API_KEY,
+    v: 'weekly',
   });
 
-  // @ts-ignore - Loader type definitions are incorrect for v2
-  await loader.load();
+  // Import required libraries
+  await importLibrary('maps');
+  await importLibrary('places');
 
   mapsLoaded = true;
   return google.maps;
