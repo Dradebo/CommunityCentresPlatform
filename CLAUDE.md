@@ -88,16 +88,36 @@ CommunityCentresPlatform/
 - Added EnrollmentStatus enum (ACTIVE, COMPLETED, SUSPENDED, PENDING)
 - Added ServiceProvisionStatus enum (PENDING, ACTIVE, COMPLETED, CANCELLED)
 
+**Phase A2-A6 - Entrepreneur Features** ✅ COMPLETE:
+
+**Backend (Go):**
+- entrepreneurs.go - Full CRUD + verification endpoint (CREATE, GET, UPDATE, DELETE, LIST, VERIFY)
+- enrollments.go - Enrollment management (CREATE, GET by hub/entrepreneur, UPDATE status)
+- services.go - Service provision tracking (CREATE, GET by hub/entrepreneur, UPDATE)
+- All routes registered in routes.go with proper auth middleware
+
+**Frontend Services:**
+- services/entrepreneur.ts - Complete entrepreneur API client
+- services/enrollment.ts - Complete enrollment API client
+- services/serviceProvision.ts - Complete service provision API client
+- src/types/entrepreneur.ts - Full TypeScript interfaces
+
+**Frontend Components:**
+- components/entrepreneur/EntrepreneurRegistrationForm.tsx - Business profile creation
+- components/entrepreneur/EntrepreneurProfile.tsx - Profile view/edit
+- components/entrepreneur/EntrepreneurDashboard.tsx - Dashboard with enrollments and services
+- components/auth/RegisterForm.tsx - Updated with ENTREPRENEUR role option
+- App.tsx - Entrepreneur routing fully integrated
+- Navigation.tsx - Entrepreneur menu items and navigation
+
+**Features:**
+- Entrepreneurs can register with business profiles
+- Hub managers can enroll entrepreneurs in programs
+- Service provision logging with hub collaborations and investor metadata
+- Profile verification by admins
+- Complete CRUD operations for all entrepreneur-related entities
+
 ### Pending Work
-
-**Phase A2-A6 - Entrepreneur Features (Backend + Frontend)** ⏳ NOT STARTED:
-
-- Backend handlers for entrepreneurs, enrollments, and service provisions
-- Frontend components for entrepreneur registration, profile, and dashboard
-- Hub enrollment management UI
-- Service provision tracking and collaboration management
-- Investor metadata management within hub details
-- Integration with existing center details and admin views
 
 **Phase C - Real-time Enhancements** ⏳ NOT STARTED:
 
@@ -105,13 +125,21 @@ CommunityCentresPlatform/
 - Enhanced messaging (typing indicators, online status)
 - New SSE events (enrollment updates, service provision updates, collaboration notifications)
 
-**Deployment - Railway + Vercel + cPanel** ⏳ NOT STARTED:
+**Google OAuth SSO** ⏳ NOT STARTED:
 
-- Railway backend deployment with PostgreSQL addon
-- Vercel frontend deployment with `/centres` base path
-- cPanel DNS configuration pointing to kii-impact.org/centres
-- Environment variable setup for production
-- Documentation in RAILWAY-VERCEL-DEPLOYMENT.md
+- Add @react-oauth/google library
+- Google OAuth button in LoginForm
+- Backend /api/auth/google endpoint
+- Google token verification server-side
+- User creation/linking logic
+
+**Deployment - Railway + Vercel + cPanel** ✅ COMPLETE:
+
+- ✅ Railway backend deployment with PostgreSQL addon
+- ✅ Vercel frontend deployment (auto-deploys from GitHub)
+- ✅ Custom domain: centres.kii-impact.org
+- ✅ Environment variables configured
+- ✅ Production site live at https://centres.kii-impact.org
 
 ## Essential Commands
 
@@ -810,37 +838,81 @@ Use `bd list` to view all issues and `bd show bd-18` for detailed Phase A2-A6 pl
 - **Backend:** https://communitycentresplatform-production-6caf.up.railway.app (Railway)
 - **Database:** PostgreSQL on Railway
 
-### Recent Session Work
+### Recent Session Work (October 31, 2025)
 
-**Phase 1 - UI/UX Improvements** ✅ COMPLETE
-1. Critical Bug Fixes:
-   - Fixed "Back to Map" button navigation
+**Phase 1 - UI/UX Improvements** ✅ COMPLETE (bd-21)
+1. **Critical Bug Fixes:**
+   - Fixed "Back to Map" button navigating to about:blank
    - Mobile navigation accessibility (aria-label, title attributes)
-2. Modal Overlay & Text Contrast:
-   - Increased overlay opacity (80% → 92%) with backdrop blur
-   - Strong text contrast for all modal types
-   - Updated: dialog.tsx, alert-dialog.tsx, sheet.tsx, drawer.tsx
+   - Files: [CommunityCenter.tsx](components/CommunityCenter.tsx), [App.tsx](App.tsx), [Navigation.tsx](components/Navigation.tsx)
 
-**Phase 2 - Google Maps Integration** ✅ COMPLETE
-1. New Components:
-   - [components/GoogleMap.tsx](components/GoogleMap.tsx) - Real Google Maps replacing SVG map
-   - [components/LocationPicker.tsx](components/LocationPicker.tsx) - Draggable pin location picker
-   - [utils/googleMaps.ts](utils/googleMaps.ts) - Google Maps API loader
-2. Features:
-   - Interactive markers color-coded by verification status
-   - Draggable pin for precise location selection
-   - Places Autocomplete search integration
-   - Reverse geocoding for address lookup
-   - Click-to-select location on map
-   - Integrated into AddCenterForm
-3. Configuration:
+2. **Modal Overlay & Text Contrast (User Pain Point):**
+   - Increased overlay opacity from 80% → 92% with backdrop-blur-sm
+   - Pure white (light mode) / dark gray (dark mode) backgrounds
+   - Strong text contrast: gray-900/white (titles), gray-600/gray-300 (descriptions)
+   - Enhanced borders, shadow-2xl, and subtle ring effects
+   - Files: [dialog.tsx](components/ui/dialog.tsx), [alert-dialog.tsx](components/ui/alert-dialog.tsx), [sheet.tsx](components/ui/sheet.tsx), [drawer.tsx](components/ui/drawer.tsx)
+
+**Phase 2 - Google Maps Integration** ✅ COMPLETE (bd-21)
+1. **New Components:**
+   - [components/GoogleMap.tsx](components/GoogleMap.tsx) - Real Google Maps with interactive markers
+   - [components/LocationPicker.tsx](components/LocationPicker.tsx) - Draggable pin + search autocomplete
+   - [utils/googleMaps.ts](utils/googleMaps.ts) - Google Maps API v2 loader
+
+2. **Features Implemented:**
+   - Interactive markers color-coded by verification status (green=verified, blue=admin, gray=pending)
+   - Draggable pin with click-to-select location
+   - Places Autocomplete search for Kampala addresses
+   - Reverse geocoding (coordinates → address)
+   - Automatic bounds fitting and marker clustering
+   - Fully integrated into AddCenterForm
+
+3. **Configuration & Security:**
    - Added `VITE_GOOGLE_MAPS_API_KEY` to .env.example
-   - Installed @googlemaps/js-api-loader package
+   - Requires Google Cloud APIs: Maps JavaScript API, Places API, Geocoding API
+   - API key restrictions: HTTP referrers (Vercel domain) + API restrictions (3 APIs only)
+   - Uses @googlemaps/js-api-loader v2.0.2 functional API (setOptions + importLibrary)
 
-**Build Status:** ✅ All changes verified, frontend compiles successfully
+4. **Production Fix:**
+   - Fixed Google Maps loader error: "The Loader class is no longer available"
+   - Migrated from deprecated Loader class to v2 functional API
+   - Commit: 42a365a
+
+**Deployment Status:**
+- ✅ All changes committed and pushed to GitHub (5 commits)
+- ✅ Vercel deployment triggered automatically
+- ✅ Build successful with Google Maps v2 API
+- ✅ Production site: https://community-centres-platform.vercel.app
+- ⚠️ Requires `VITE_GOOGLE_MAPS_API_KEY` set in Vercel environment variables
+
+**Beads Tracking:**
+- bd-21: Phase 1-2 UI/UX + Google Maps - CLOSED ✅
 
 ### Next Steps: Phase 3-5 Pending
 - Phase 3: Enhanced search UX (clear button, result count, highlighting)
 - Phase 4: Improved interactions (breadcrumbs, share, directions)
 - Phase 5: Accessibility audit and improvements
+
+### Google Maps Setup Instructions
+
+**Required Environment Variable:**
+```bash
+VITE_GOOGLE_MAPS_API_KEY="AIzaSyD-your-api-key-here"
+```
+
+**Google Cloud Console Setup:**
+1. Create project at https://console.cloud.google.com/
+2. Enable APIs: Maps JavaScript API, Places API, Geocoding API
+3. Create API key in Credentials
+4. Restrict API key:
+   - **HTTP referrers**: Add Vercel domain (https://community-centres-platform.vercel.app/*)
+   - **API restrictions**: Only allow the 3 required APIs
+5. Enable billing (required, but $200/month free tier covers most usage)
+6. Set usage quotas and billing alerts
+
+**Security Notes:**
+- ✅ SAFE to expose API key in browser (VITE_ prefix) - Google Maps is designed for client-side use
+- ✅ Protection comes from API key restrictions (domain + API limits), not from hiding the key
+- ⚠️ MUST restrict key to specific domains and APIs in Google Cloud Console
+- ⚠️ Monitor usage regularly to detect abuse
 
