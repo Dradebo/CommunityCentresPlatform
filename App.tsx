@@ -427,7 +427,11 @@ function AppContent() {
               <MapSkeleton />
             ) : (
               <GoogleMap
-                centers={centersToDisplay}
+                centers={centersToDisplay.map(center => ({
+                  ...center,
+                  latitude: center.coordinates.lat,
+                  longitude: center.coordinates.lng
+                }))}
                 selectedCenter={selectedCenter}
                 onCenterSelect={(centerId) => {
                   setSelectedCenter(centerId);

@@ -79,6 +79,14 @@ export function GoogleMap({ centers, selectedCenter, onCenterSelect, className =
 
     // Add or update markers
     centers.forEach(center => {
+      // Skip centers with invalid coordinates
+      if (typeof center.latitude !== 'number' || typeof center.longitude !== 'number' ||
+          isNaN(center.latitude) || isNaN(center.longitude)) {
+        console.warn(`Skipping center ${center.id} (${center.name}) with invalid coordinates:`,
+          { latitude: center.latitude, longitude: center.longitude });
+        return;
+      }
+
       const position = {
         lat: center.latitude,
         lng: center.longitude,
@@ -141,7 +149,11 @@ export function GoogleMap({ centers, selectedCenter, onCenterSelect, className =
     if (centers.length > 0) {
       const bounds = new google.maps.LatLngBounds();
       centers.forEach(center => {
-        bounds.extend({ lat: center.latitude, lng: center.longitude });
+        // Only include centers with valid coordinates in bounds calculation
+        if (typeof center.latitude === 'number' && typeof center.longitude === 'number' &&
+            !isNaN(center.latitude) && !isNaN(center.longitude)) {
+          bounds.extend({ lat: center.latitude, lng: center.longitude });
+        }
       });
       map.fitBounds(bounds);
 

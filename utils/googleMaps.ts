@@ -20,17 +20,21 @@ export const KAMPALA_CENTER: LatLng = {
 export const DEFAULT_ZOOM = 12;
 
 let mapsLoaded = false;
+let optionsSet = false;
 
 export const loadGoogleMaps = async (): Promise<typeof google.maps> => {
   if (mapsLoaded) {
     return google.maps;
   }
 
-  // Set API options (must be called before importLibrary)
-  setOptions({
-    key: API_KEY,
-    v: 'weekly',
-  });
+  // Set API options only once (must be called before importLibrary)
+  if (!optionsSet) {
+    setOptions({
+      key: API_KEY,
+      v: 'weekly',
+    });
+    optionsSet = true;
+  }
 
   // Import required libraries
   await importLibrary('maps');
