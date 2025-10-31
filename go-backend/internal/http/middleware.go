@@ -52,11 +52,12 @@ func AuthMiddleware(secret string) gin.HandlerFunc {
 	}
 }
 
-// ConfigMiddleware stores config values needed in handlers (e.g., JWT secret)
-func ConfigMiddleware(jwtSecret string, jwtExpiry string) gin.HandlerFunc {
+// ConfigMiddleware stores config values needed in handlers (e.g., JWT secret, Google Client ID)
+func ConfigMiddleware(jwtSecret string, jwtExpiry string, googleClientID string) gin.HandlerFunc {
     return func(c *gin.Context) {
         c.Set(ctxutil.KeyJWTSecret, jwtSecret)
         c.Set(ctxutil.KeyJWTExpiry, jwtExpiry)
+        c.Set(ctxutil.KeyGoogleClientID, googleClientID)
         c.Next()
     }
 }

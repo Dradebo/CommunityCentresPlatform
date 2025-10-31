@@ -117,6 +117,38 @@ CommunityCentresPlatform/
 - Profile verification by admins
 - Complete CRUD operations for all entrepreneur-related entities
 
+**Google OAuth SSO** ✅ COMPLETE:
+
+**Backend (Go):**
+- go-backend/internal/auth/google.go - Google token verification utility
+- go-backend/internal/http/handlers/auth.go - GoogleVerify handler
+- go-backend/internal/db/models.go - Added GoogleID, PictureURL, AuthProvider fields to User model
+- go-backend/internal/config/config.go - Added GoogleClientID configuration
+- POST /api/auth/google/verify endpoint registered and working
+
+**Frontend (React):**
+- Installed @react-oauth/google package
+- components/auth/GoogleLoginButton.tsx - Google Sign-In button component
+- components/auth/LoginForm.tsx - Integrated Google button with "OR" divider
+- contexts/AuthContext.tsx - Added loginWithGoogle method
+- services/api.ts - Added loginWithGoogle API method
+- App.tsx - Wrapped with GoogleOAuthProvider
+
+**Features:**
+- Users can sign in/register with Google accounts
+- Automatic account linking by email
+- Google profile picture integration
+- Credential flow (no page redirects, modal-friendly)
+- Dark mode compatible Google button
+- Environment variables configured in .env.example files
+
+**Setup Requirements:**
+1. Create OAuth 2.0 Client ID in Google Cloud Console
+2. Add authorized JavaScript origins (localhost, Vercel domain)
+3. Set VITE_GOOGLE_CLIENT_ID in frontend environment
+4. Set GOOGLE_CLIENT_ID in backend environment
+5. Enable: Maps JavaScript API, Places API, Geocoding API (already done for Google Maps)
+
 ### Pending Work
 
 **Phase C - Real-time Enhancements** ⏳ NOT STARTED:
@@ -124,14 +156,6 @@ CommunityCentresPlatform/
 - Notification system (database table, backend endpoints, frontend components)
 - Enhanced messaging (typing indicators, online status)
 - New SSE events (enrollment updates, service provision updates, collaboration notifications)
-
-**Google OAuth SSO** ⏳ NOT STARTED:
-
-- Add @react-oauth/google library
-- Google OAuth button in LoginForm
-- Backend /api/auth/google endpoint
-- Google token verification server-side
-- User creation/linking logic
 
 **Deployment - Railway + Vercel + cPanel** ✅ COMPLETE:
 

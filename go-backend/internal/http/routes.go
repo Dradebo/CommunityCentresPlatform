@@ -16,6 +16,7 @@ func RegisterRoutes(r *gin.Engine, d Deps) {
 	{
         auth.POST("/register", handlers.Register)
         auth.POST("/login", handlers.Login)
+        auth.POST("/google/verify", handlers.GoogleVerify)
         auth.GET("/me", AuthMiddleware(d.JWTSecret), handlers.Me)
 	}
 

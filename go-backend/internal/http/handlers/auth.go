@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -163,6 +164,97 @@ func Me(c *gin.Context) {
 			"role":      user.Role,
 			"verified":  user.Verified,
 			"createdAt": user.CreatedAt,
+		},
+	})
+}
+
+type googleVerifyRequest struct {
+	Credential string `json:"credential" binding:"required"`
+}
+
+// POST /api/auth/google/verify
+func GoogleVerify(c *gin.Context) {
+	var req googleVerifyRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "credential is required"})
+		return
+	}
+
+	gdb := ctxutil.DBFrom(c)
+	if gdb == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "db unavailable"})
+		return
+	}
+
+	// Get Google Client ID from context
+	googleClientID := ctxutil.GoogleClientIDFrom(c)
+	if googleClientID == "" {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Google OAuth not configured"})
+		return
+	}
+
+	// Verify Google token
+	googleUser, err := auth.VerifyGoogleToken(req.Credential, googleClientID)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": fmt.Sprintf("Google verification failed: %s", err.Error())})
+		return
+	}
+
+	// Check if user exists by GoogleID or email
+	var user db.User
+	result := gdb.Where("google_id = ?", googleUser.GoogleID).Or("email = ?", googleUser.Email).First(&user)
+
+	if result.Error != nil {
+		// User doesn't exist - create new user
+		user = db.User{
+			Email:        googleUser.Email,
+			Password:     "", // Google OAuth users don't have passwords
+			Name:         googleUser.Name,
+			Role:         db.RoleVisitor,
+			Verified:     true, // Google accounts are pre-verified
+			GoogleID:     &googleUser.GoogleID,
+			PictureURL:   &googleUser.Picture,
+			AuthProvider: "GOOGLE",
+		}
+		if err := gdb.Create(&user).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create user"})
+			return
+		}
+	} else {
+		// User exists - update Google info
+		user.GoogleID = &googleUser.GoogleID
+		user.PictureURL = &googleUser.Picture
+		user.Name = googleUser.Name
+		user.Verified = true
+		// Update AuthProvider to GOOGLE if it was EMAIL before
+		if user.AuthProvider == "EMAIL" {
+			user.AuthProvider = "GOOGLE"
+		}
+		if err := gdb.Save(&user).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update user"})
+			return
+		}
+	}
+
+	// Generate JWT token
+	secret := ctxutil.JWTSecretFrom(c)
+	dur, _ := time.ParseDuration(ctxutil.JWTExpiryFrom(c))
+	token, err := auth.SignJWT(secret, dur, user.ID.String(), user.Email, string(user.Role), user.Name)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to sign token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Google sign-in successful",
+		"token":   token,
+		"user": gin.H{
+			"id":         user.ID,
+			"email":      user.Email,
+			"name":       user.Name,
+			"role":       user.Role,
+			"verified":   user.Verified,
+			"pictureURL": user.PictureURL,
 		},
 	})
 }

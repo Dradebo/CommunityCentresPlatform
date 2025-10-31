@@ -64,17 +64,37 @@ class APIService {
       headers: this.getAuthHeaders(),
       body: JSON.stringify(credentials),
     });
-    
+
     const result = await this.handleResponse<{
       message: string;
       token: string;
       user: any;
     }>(response);
-    
+
     if (result.token) {
       localStorage.setItem('auth_token', result.token);
     }
-    
+
+    return result;
+  }
+
+  async loginWithGoogle(credential: string) {
+    const response = await fetch(`${API_BASE_URL}/auth/google/verify`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({ credential }),
+    });
+
+    const result = await this.handleResponse<{
+      message: string;
+      token: string;
+      user: any;
+    }>(response);
+
+    if (result.token) {
+      localStorage.setItem('auth_token', result.token);
+    }
+
     return result;
   }
 

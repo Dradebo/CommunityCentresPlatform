@@ -63,14 +63,17 @@ func (a *StringArray) Scan(value interface{}) error {
 
 // User model matching Prisma exactly
 type User struct {
-	ID        uuid.UUID `gorm:"type:uuid;primaryKey;column:id"`
-	Email     string    `gorm:"uniqueIndex;size:255;not null;column:email"`
-	Password  string    `gorm:"size:255;not null;column:password"`
-	Name      string    `gorm:"size:255;not null;column:name"`
-	Role      Role      `gorm:"type:varchar(20);not null;default:'VISITOR';column:role"`
-	Verified  bool      `gorm:"default:false;not null;column:verified"`
-	CreatedAt time.Time `gorm:"column:created_at"`
-	UpdatedAt time.Time `gorm:"column:updated_at"`
+	ID           uuid.UUID `gorm:"type:uuid;primaryKey;column:id"`
+	Email        string    `gorm:"uniqueIndex;size:255;not null;column:email"`
+	Password     string    `gorm:"size:255;not null;column:password"`
+	Name         string    `gorm:"size:255;not null;column:name"`
+	Role         Role      `gorm:"type:varchar(20);not null;default:'VISITOR';column:role"`
+	Verified     bool      `gorm:"default:false;not null;column:verified"`
+	GoogleID     *string   `gorm:"uniqueIndex;size:255;column:google_id"`        // Google's unique user ID
+	PictureURL   *string   `gorm:"size:500;column:picture_url"`                  // User's profile picture URL
+	AuthProvider string    `gorm:"size:20;not null;default:'EMAIL';column:auth_provider"` // EMAIL or GOOGLE
+	CreatedAt    time.Time `gorm:"column:created_at"`
+	UpdatedAt    time.Time `gorm:"column:updated_at"`
 
 	// Relations
 	ManagedCenters  []CommunityCenter `gorm:"foreignKey:ManagerID"`

@@ -38,8 +38,8 @@ func main() {
     r := httpx.NewRouter(httpx.Deps{FrontendURL: cfg.FrontendURL, DB: database.DB, JWTSecret: cfg.JWTSecret})
     r.Use(httpx.RequestLogger())
     r.GET("/healthz", func(c *gin.Context) { c.JSON(http.StatusOK, gin.H{"status": "ok"}) })
-    // expose config to handlers (JWT secret/expiry)
-    r.Use(httpx.ConfigMiddleware(cfg.JWTSecret, cfg.JWTExpiresIn.String()))
+    // expose config to handlers (JWT secret/expiry, Google Client ID)
+    r.Use(httpx.ConfigMiddleware(cfg.JWTSecret, cfg.JWTExpiresIn.String(), cfg.GoogleClientID))
     // SSE broker
     broker := events.NewBroker()
     r.Use(httpx.BrokerMiddleware(broker))

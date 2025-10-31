@@ -7,10 +7,11 @@ import (
 )
 
 const (
-    KeyDB        = "db"
-    KeyJWTSecret = "jwtSecret"
-    KeyJWTExpiry = "jwtExpiry"
-    KeyBroker    = "sseBroker"
+    KeyDB             = "db"
+    KeyJWTSecret      = "jwtSecret"
+    KeyJWTExpiry      = "jwtExpiry"
+    KeyBroker         = "sseBroker"
+    KeyGoogleClientID = "googleClientID"
 
     KeyUserID = "userId"
     KeyEmail  = "email"
@@ -83,6 +84,15 @@ func RoleFrom(c *gin.Context) string {
 
 func NameFrom(c *gin.Context) string {
     if v, ok := c.Get(KeyName); ok {
+        if s, ok2 := v.(string); ok2 {
+            return s
+        }
+    }
+    return ""
+}
+
+func GoogleClientIDFrom(c *gin.Context) string {
+    if v, ok := c.Get(KeyGoogleClientID); ok {
         if s, ok2 := v.(string); ok2 {
             return s
         }

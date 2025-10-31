@@ -7,21 +7,23 @@ import (
 )
 
 type Config struct {
-    Port         string
-    FrontendURL  string
-    DatabaseURL  string
-    JWTSecret    string
-    JWTExpiresIn time.Duration
-    RealtimeProv string
+    Port            string
+    FrontendURL     string
+    DatabaseURL     string
+    JWTSecret       string
+    JWTExpiresIn    time.Duration
+    RealtimeProv    string
+    GoogleClientID  string
 }
 
 func Load() Config {
     cfg := Config{
-        Port:        getenv("PORT", "8080"),
-        FrontendURL: getenv("FRONTEND_URL", "http://localhost:3000"),
-        DatabaseURL: os.Getenv("DATABASE_URL"),
-        JWTSecret:   os.Getenv("JWT_SECRET"),
-        RealtimeProv: getenv("REALTIME_PROVIDER", "socketio"),
+        Port:           getenv("PORT", "8080"),
+        FrontendURL:    getenv("FRONTEND_URL", "http://localhost:3000"),
+        DatabaseURL:    os.Getenv("DATABASE_URL"),
+        JWTSecret:      os.Getenv("JWT_SECRET"),
+        RealtimeProv:   getenv("REALTIME_PROVIDER", "socketio"),
+        GoogleClientID: os.Getenv("GOOGLE_CLIENT_ID"),
     }
     // duration with default 168h
     if d := getenv("JWT_EXPIRES_IN", "168h"); d != "" {

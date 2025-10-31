@@ -14,6 +14,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: (credential: string) => Promise<void>;
   register: (userData: {
     email: string;
     password: string;
@@ -85,6 +86,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const loginWithGoogle = async (credential: string) => {
+    try {
+      const response = await apiService.loginWithGoogle(credential);
+      setUser(response.user);
+
+      // Connect to SSE stream
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        await eventsService.connect();
+      }
+    } catch (error) {
+      throw error;
+    }
+  };
+
   const register = async (userData: {
     email: string;
     password: string;
@@ -115,6 +131,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     loading,
     login,
+    loginWithGoogle,
     register,
     logout,
     isAuthenticated: !!user,

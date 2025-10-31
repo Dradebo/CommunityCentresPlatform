@@ -5,6 +5,7 @@ import { Label } from '../ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Alert, AlertDescription } from '../ui/alert';
 import { useAuth } from '../../contexts/AuthContext';
+import { GoogleLoginButton } from './GoogleLoginButton';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 
 interface LoginFormProps {
@@ -49,7 +50,20 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister, onClos
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          
+
+          <GoogleLoginButton onSuccess={onClose} />
+
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-gray-300 dark:border-gray-600" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white dark:bg-gray-800 px-2 text-gray-500 dark:text-gray-400">
+                Or continue with email
+              </span>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <div className="relative">
