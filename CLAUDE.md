@@ -149,6 +149,11 @@ CommunityCentresPlatform/
 4. Set GOOGLE_CLIENT_ID in backend environment
 5. Enable: Maps JavaScript API, Places API, Geocoding API (already done for Google Maps)
 
+**Recent Session (October 31, 2025):**
+- Implemented complete Google OAuth SSO with credential flow
+- Fixed dark mode background issue (main app container now properly switches to dark:bg-gray-900)
+- All changes committed to main branch (commit 51b06b7 for Google OAuth)
+
 ### Pending Work
 
 **Phase C - Real-time Enhancements** ⏳ NOT STARTED:
@@ -939,4 +944,5 @@ VITE_GOOGLE_MAPS_API_KEY="AIzaSyD-your-api-key-here"
 - ✅ Protection comes from API key restrictions (domain + API limits), not from hiding the key
 - ⚠️ MUST restrict key to specific domains and APIs in Google Cloud Console
 - ⚠️ Monitor usage regularly to detect abuse
+
 

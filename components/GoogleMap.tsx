@@ -79,17 +79,20 @@ export function GoogleMap({ centers, selectedCenter, onCenterSelect, className =
 
     // Add or update markers
     centers.forEach(center => {
+      // Parse coordinates to handle both strings and numbers
+      const lat = typeof center.latitude === 'string' ? parseFloat(center.latitude) : center.latitude;
+      const lng = typeof center.longitude === 'string' ? parseFloat(center.longitude) : center.longitude;
+
       // Skip centers with invalid coordinates
-      if (typeof center.latitude !== 'number' || typeof center.longitude !== 'number' ||
-          isNaN(center.latitude) || isNaN(center.longitude)) {
+      if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) {
         console.warn(`Skipping center ${center.id} (${center.name}) with invalid coordinates:`,
-          { latitude: center.latitude, longitude: center.longitude });
+          { latitude: center.latitude, longitude: center.longitude, parsedLat: lat, parsedLng: lng });
         return;
       }
 
       const position = {
-        lat: center.latitude,
-        lng: center.longitude,
+        lat,
+        lng,
       };
 
       let marker = markersRef.current.get(center.id);
@@ -149,10 +152,12 @@ export function GoogleMap({ centers, selectedCenter, onCenterSelect, className =
     if (centers.length > 0) {
       const bounds = new google.maps.LatLngBounds();
       centers.forEach(center => {
-        // Only include centers with valid coordinates in bounds calculation
-        if (typeof center.latitude === 'number' && typeof center.longitude === 'number' &&
-            !isNaN(center.latitude) && !isNaN(center.longitude)) {
-          bounds.extend({ lat: center.latitude, lng: center.longitude });
+        // Parse and validate coordinates for bounds calculation
+        const lat = typeof center.latitude === 'string' ? parseFloat(center.latitude) : center.latitude;
+        const lng = typeof center.longitude === 'string' ? parseFloat(center.longitude) : center.longitude;
+
+        if (typeof lat === 'number' && typeof lng === 'number' && !isNaN(lat) && !isNaN(lng)) {
+          bounds.extend({ lat, lng });
         }
       });
       map.fitBounds(bounds);

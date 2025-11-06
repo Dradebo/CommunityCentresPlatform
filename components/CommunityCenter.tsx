@@ -6,17 +6,19 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { ContactCenterForm } from './ContactCenterForm';
 import { CenterMessaging } from './CenterMessaging';
-import { 
-  MapPin, 
-  Phone, 
-  Mail, 
-  Globe, 
-  Users, 
-  CheckCircle, 
+import { GoogleMap } from './GoogleMap';
+import {
+  MapPin,
+  Phone,
+  Mail,
+  Globe,
+  Users,
+  CheckCircle,
   AlertTriangle,
   Link,
   ArrowLeft,
-  MessageSquare
+  MessageSquare,
+  ExternalLink
 } from 'lucide-react';
 
 interface CommunityCenterData {
@@ -272,22 +274,40 @@ export function CommunityCenter({ center, allCenters, onConnectCenter, onSendCon
       {/* Location Map */}
       <Card>
         <CardHeader>
-          <CardTitle>Location</CardTitle>
+          <CardTitle className="flex items-center justify-between">
+            <span>Location</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const url = `https://www.google.com/maps/search/?api=1&query=${center.coordinates.lat},${center.coordinates.lng}`;
+                window.open(url, '_blank', 'noopener,noreferrer');
+              }}
+            >
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Open in Google Maps
+            </Button>
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="bg-green-50 rounded-lg p-8 text-center">
-            <MapPin className="h-12 w-12 mx-auto mb-4 text-blue-600" />
-            <p className="text-lg mb-2">{center.name}</p>
-            <p className="text-gray-600">{center.location}</p>
-            <p className="text-sm text-gray-500 mt-2">
+          <GoogleMap
+            centers={[{
+              id: center.id,
+              name: center.name,
+              latitude: center.coordinates.lat,
+              longitude: center.coordinates.lng,
+              verificationStatus: center.verified ? 'verified' : 'pending',
+              addedBy: { role: center.addedBy.toUpperCase() }
+            }]}
+            selectedCenter={center.id}
+            onCenterSelect={() => {}}
+            className="h-[300px] rounded-lg mb-4"
+          />
+          <div className="text-center">
+            <p className="text-sm text-gray-600 dark:text-gray-300">{center.location}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               Coordinates: {center.coordinates.lat.toFixed(4)}, {center.coordinates.lng.toFixed(4)}
             </p>
-            <div className="mt-4">
-              <Button variant="outline" size="sm">
-                <Globe className="h-4 w-4 mr-2" />
-                Open in Maps
-              </Button>
-            </div>
           </div>
         </CardContent>
       </Card>

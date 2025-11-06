@@ -430,8 +430,8 @@ function AppContent() {
               <GoogleMap
                 centers={centersToDisplay.map(center => ({
                   ...center,
-                  latitude: center.coordinates.lat,
-                  longitude: center.coordinates.lng
+                  latitude: typeof center.coordinates.lat === 'number' ? center.coordinates.lat : parseFloat(center.coordinates.lat as any),
+                  longitude: typeof center.coordinates.lng === 'number' ? center.coordinates.lng : parseFloat(center.coordinates.lng as any)
                 }))}
                 selectedCenter={selectedCenter}
                 onCenterSelect={(centerId) => {
