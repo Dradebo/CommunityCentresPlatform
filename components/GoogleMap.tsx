@@ -64,7 +64,10 @@ export function GoogleMap({ centers, selectedCenter, onCenterSelect, className =
 
   // Add/update markers when centers change
   useEffect(() => {
-    if (!mapInstanceRef.current) return;
+    // Wait for map to finish loading before adding markers
+    if (!mapInstanceRef.current || isLoading) return;
+
+    console.log(`GoogleMap: Processing ${centers.length} centers for marker display`);
 
     const map = mapInstanceRef.current;
 
@@ -170,7 +173,7 @@ export function GoogleMap({ centers, selectedCenter, onCenterSelect, className =
         }
       });
     }
-  }, [centers, selectedCenter, onCenterSelect]);
+  }, [centers, selectedCenter, onCenterSelect, isLoading]);
 
   // Cleanup
   useEffect(() => {
