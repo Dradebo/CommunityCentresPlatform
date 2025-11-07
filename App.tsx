@@ -150,7 +150,12 @@ function AppContent() {
     try {
       if (isAdmin) {
         const response = await apiService.getContactMessages();
-        setContactMessages(response.messages);
+        // Convert string timestamps to Date objects
+        const messagesWithDates = response.messages.map(msg => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp)
+        }));
+        setContactMessages(messagesWithDates);
       }
     } catch (err: any) {
       console.error('Error loading contact messages:', err);
@@ -283,10 +288,24 @@ function AppContent() {
       // Reload messages for this thread
       if (selectedCenter) {
         const response = await apiService.getMessageThreads(selectedCenter);
-        setMessageThreads(response.threads);
+        // Convert timestamps for threads
+        const threadsWithDates = response.threads.map(thread => ({
+          ...thread,
+          lastActivity: new Date(thread.lastActivity),
+          lastMessage: thread.lastMessage ? {
+            ...thread.lastMessage,
+            timestamp: new Date(thread.lastMessage.timestamp)
+          } : undefined
+        }));
+        setMessageThreads(threadsWithDates);
         // Also reload messages for the thread
         const messagesResponse = await apiService.getThreadMessages(threadId);
-        setCenterMessages(messagesResponse.messages);
+        // Convert timestamps for messages
+        const messagesWithDates = messagesResponse.messages.map(msg => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp)
+        }));
+        setCenterMessages(messagesWithDates);
       }
     } catch (err: any) {
       toast.error('Failed to Send Message', {
@@ -308,7 +327,16 @@ function AppContent() {
       // Reload threads
       if (selectedCenter) {
         const response = await apiService.getMessageThreads(selectedCenter);
-        setMessageThreads(response.threads);
+        // Convert timestamps for threads
+        const threadsWithDates = response.threads.map(thread => ({
+          ...thread,
+          lastActivity: new Date(thread.lastActivity),
+          lastMessage: thread.lastMessage ? {
+            ...thread.lastMessage,
+            timestamp: new Date(thread.lastMessage.timestamp)
+          } : undefined
+        }));
+        setMessageThreads(threadsWithDates);
       }
     } catch (err: any) {
       toast.error('Failed to Create Thread', {
