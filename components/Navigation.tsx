@@ -59,6 +59,7 @@ export function Navigation({ currentView, setCurrentView, user, onAuthRequired }
   };
 
   const isEntrepreneur = user?.role === 'ENTREPRENEUR';
+  const canAddCenter = user?.role === 'ADMIN' || user?.role === 'CENTER_MANAGER';
 
   return (
     <nav className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 transition-colors">
@@ -82,14 +83,16 @@ export function Navigation({ currentView, setCurrentView, user, onAuthRequired }
                 <span>Map View</span>
               </Button>
 
-              <Button
-                variant="outline"
-                onClick={() => setCurrentView('add-center')}
-                className="flex items-center space-x-2"
-              >
-                <Plus className="h-4 w-4" />
-                <span>Add Center</span>
-              </Button>
+              {canAddCenter && (
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentView('add-center')}
+                  className="flex items-center space-x-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Add Center</span>
+                </Button>
+              )}
             </div>
 
             <div className="flex md:hidden items-center space-x-2">
@@ -103,15 +106,17 @@ export function Navigation({ currentView, setCurrentView, user, onAuthRequired }
                 <Map className="h-4 w-4" />
               </Button>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentView('add-center')}
-                aria-label="Add Center"
-                title="Add Center"
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
+              {canAddCenter && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentView('add-center')}
+                  aria-label="Add Center"
+                  title="Add Center"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              )}
             </div>
 
             <ThemeToggle />

@@ -186,6 +186,7 @@ function AppContent() {
         latitude: centerData.coordinates.lat,
         longitude: centerData.coordinates.lng,
         services: centerData.services,
+        resources: centerData.resources,
         description: centerData.description,
         phone: centerData.contactInfo.phone,
         email: centerData.contactInfo.email,
