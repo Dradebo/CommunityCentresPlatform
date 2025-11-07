@@ -101,6 +101,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (token) {
         await eventsService.connect();
       }
+
+      // Return response for caller to check user details
+      return response;
     } catch (error) {
       throw error;
     }
