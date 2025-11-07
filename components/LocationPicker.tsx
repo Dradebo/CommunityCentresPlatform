@@ -24,6 +24,8 @@ export function LocationPicker({ initialLocation, onLocationSelect, className = 
 
   // Initialize Google Map
   useEffect(() => {
+    console.log('LocationPicker: Initializing map instance');
+
     const initMap = async () => {
       if (!mapRef.current) return;
 
@@ -125,6 +127,32 @@ export function LocationPicker({ initialLocation, onLocationSelect, className = 
 
     initMap();
   }, [initialLocation]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      // Clean up marker
+      if (markerRef.current) {
+        markerRef.current.setMap(null);
+        markerRef.current = null;
+      }
+
+      // Clear autocomplete
+      if (autocompleteRef.current) {
+        google.maps.event.clearInstanceListeners(autocompleteRef.current);
+        autocompleteRef.current = null;
+      }
+
+      // Clear map instance reference to force fresh initialization on remount
+      if (mapInstanceRef.current) {
+        google.maps.event.clearInstanceListeners(mapInstanceRef.current);
+        mapInstanceRef.current = null;
+      }
+
+      // Reset loading state for clean remount
+      setIsLoading(true);
+    };
+  }, []);
 
   // Reverse geocode to get address from coordinates
   const reverseGeocode = async (location: LatLng) => {

@@ -291,6 +291,7 @@ export function CommunityCenter({ center, allCenters, onConnectCenter, onSendCon
         </CardHeader>
         <CardContent>
           <GoogleMap
+            key={`detail-map-${center.id}`}
             centers={[{
               id: center.id,
               name: center.name,

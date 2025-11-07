@@ -428,10 +428,13 @@ function AppContent() {
               <MapSkeleton />
             ) : (
               <GoogleMap
+                key={`main-map-${currentView}`}
                 centers={centersToDisplay.map(center => ({
                   ...center,
                   latitude: typeof center.coordinates.lat === 'number' ? center.coordinates.lat : parseFloat(center.coordinates.lat as any),
-                  longitude: typeof center.coordinates.lng === 'number' ? center.coordinates.lng : parseFloat(center.coordinates.lng as any)
+                  longitude: typeof center.coordinates.lng === 'number' ? center.coordinates.lng : parseFloat(center.coordinates.lng as any),
+                  verificationStatus: center.verified ? 'verified' : 'pending',
+                  addedBy: { role: center.addedBy.toUpperCase() }
                 }))}
                 selectedCenter={selectedCenter}
                 onCenterSelect={(centerId) => {
