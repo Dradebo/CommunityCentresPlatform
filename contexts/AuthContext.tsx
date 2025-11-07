@@ -81,11 +81,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const response = await apiService.login({ email, password });
       setUser(response.user);
-      
-      // Connect to SSE stream
+
+      // Connect to SSE stream in background (non-blocking)
+      // SSE failure should not block login success
       const token = localStorage.getItem('auth_token');
       if (token) {
-        await eventsService.connect();
+        eventsService.connect().catch(err => {
+          console.warn('SSE connection failed after email login (non-critical):', err);
+          // User is still successfully logged in even if SSE fails
+        });
       }
     } catch (error) {
       throw error;
@@ -97,10 +101,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await apiService.loginWithGoogle(credential);
       setUser(response.user);
 
-      // Connect to SSE stream
+      // Connect to SSE stream in background (non-blocking)
+      // SSE failure should not block login success
       const token = localStorage.getItem('auth_token');
       if (token) {
-        await eventsService.connect();
+        eventsService.connect().catch(err => {
+          console.warn('SSE connection failed after Google login (non-critical):', err);
+          // User is still successfully logged in even if SSE fails
+        });
       }
 
       // Return response for caller to check user details
