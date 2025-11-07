@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
-import { MapPin, CheckCircle, Users, Sparkles } from 'lucide-react';
+import { MapPin, CheckCircle, Users, Sparkles, Building } from 'lucide-react';
 
 interface CenterCardProps {
   center: {
@@ -10,6 +10,7 @@ interface CenterCardProps {
     location: string;
     coordinates: { lat: number; lng: number };
     services: string[];
+    resources?: string[];
     description: string;
     verified: boolean;
     connections: string[];
@@ -115,6 +116,13 @@ export const CenterCard: React.FC<CenterCardProps> = ({ center, onClick }) => {
           {center.services.length > 3 && (
             <Badge variant="outline" className="text-xs">
               +{center.services.length - 3} more
+            </Badge>
+          )}
+          {/* Resource count badge */}
+          {center.resources && center.resources.length > 0 && (
+            <Badge variant="outline" className="text-xs border-purple-500 text-purple-700 dark:border-purple-400 dark:text-purple-300">
+              <Building className="h-3 w-3 mr-1" />
+              {center.resources.length} {center.resources.length === 1 ? 'Resource' : 'Resources'}
             </Badge>
           )}
         </div>

@@ -75,6 +75,7 @@ func ListCenters(c *gin.Context) {
 			"location":    center.Location,
 			"coordinates": gin.H{"lat": center.Latitude, "lng": center.Longitude},
 			"services":    center.Services,
+			"resources":   center.Resources,
 			"description": center.Description,
 			"verified":    center.Verified,
 			"connections": connectionIDs,
@@ -170,6 +171,7 @@ func GetCenter(c *gin.Context) {
 		"location":         center.Location,
 		"coordinates":      gin.H{"lat": center.Latitude, "lng": center.Longitude},
 		"services":         center.Services,
+		"resources":        center.Resources,
 		"description":      center.Description,
 		"verified":         center.Verified,
 		"connections":      connectionIDs,
@@ -191,6 +193,7 @@ type centerRequest struct {
 	Latitude    float64  `json:"latitude" binding:"required,min=-90,max=90"`
 	Longitude   float64  `json:"longitude" binding:"required,min=-180,max=180"`
 	Services    []string `json:"services" binding:"required,min=1"`
+	Resources   []string `json:"resources" binding:"required,min=1"`
 	Description string   `json:"description" binding:"required,min=10"`
 	Phone       string   `json:"phone"`
 	Email       string   `json:"email"`
@@ -240,6 +243,7 @@ func CreateCenter(c *gin.Context) {
 		Longitude:   req.Longitude,
 		Description: req.Description,
 		Services:    db.StringArray(req.Services),
+		Resources:   db.StringArray(req.Resources),
 		AddedBy:     userID,
 		Verified:    role == "ADMIN",
 		ManagerID:   managerID,
@@ -266,6 +270,7 @@ func CreateCenter(c *gin.Context) {
 			"location":    center.Location,
 			"coordinates": gin.H{"lat": center.Latitude, "lng": center.Longitude},
 			"services":    center.Services,
+			"resources":   center.Resources,
 			"description": center.Description,
 			"verified":    center.Verified,
 			"connections": []uuid.UUID{},

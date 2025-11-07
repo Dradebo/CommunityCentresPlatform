@@ -99,6 +99,7 @@ type CommunityCenter struct {
 	Latitude    float64     `gorm:"type:double precision;not null;column:latitude"`
 	Longitude   float64     `gorm:"type:double precision;not null;column:longitude"`
 	Services    StringArray `gorm:"type:text[];column:services"` // PostgreSQL array
+	Resources   StringArray `gorm:"type:text[];column:resources"` // PostgreSQL array for resources available
 	Description string      `gorm:"type:text;column:description"`
 	Verified    bool        `gorm:"default:false;not null;column:verified"`
 	AddedBy     string      `gorm:"size:255;not null;column:added_by"` // User ID who added center

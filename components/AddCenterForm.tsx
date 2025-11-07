@@ -5,15 +5,17 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { Checkbox } from './ui/checkbox';
-import { Plus } from 'lucide-react';
+import { Plus, ArrowLeft } from 'lucide-react';
 import { LocationPicker } from './LocationPicker';
 import { LatLng } from '../utils/googleMaps';
+import { availableResources, resourceCategories, ResourceCategory } from '../utils/resources';
 
 interface CommunityCenterData {
   name: string;
   location: string;
   coordinates: { lat: number; lng: number };
   services: string[];
+  resources: string[];
   description: string;
   addedBy: 'admin' | 'visitor';
   contactInfo: {
@@ -25,6 +27,7 @@ interface CommunityCenterData {
 
 interface AddCenterFormProps {
   onAddCenter: (centerData: CommunityCenterData) => void;
+  onBack: () => void;
   isAdmin: boolean;
 }
 
@@ -55,12 +58,13 @@ const kampalaAreas = [
   { name: 'Nakawa Division', lat: 0.3373, lng: 32.6268 }
 ];
 
-export function AddCenterForm({ onAddCenter, isAdmin }: AddCenterFormProps) {
+export function AddCenterForm({ onAddCenter, onBack, isAdmin }: AddCenterFormProps) {
   const [formData, setFormData] = useState({
     name: '',
     location: '',
     description: '',
     selectedServices: [] as string[],
+    selectedResources: [] as string[],
     phone: '',
     email: '',
     website: '',
@@ -78,6 +82,15 @@ export function AddCenterForm({ onAddCenter, isAdmin }: AddCenterFormProps) {
     }));
   };
 
+  const handleResourceToggle = (resource: string) => {
+    setFormData(prev => ({
+      ...prev,
+      selectedResources: prev.selectedResources.includes(resource)
+        ? prev.selectedResources.filter(r => r !== resource)
+        : [...prev.selectedResources, resource]
+    }));
+  };
+
   const handleLocationSelect = (location: LatLng, address?: string) => {
     setFormData(prev => ({
       ...prev,
@@ -91,8 +104,9 @@ export function AddCenterForm({ onAddCenter, isAdmin }: AddCenterFormProps) {
     setIsSubmitting(true);
 
     // Validate form
-    if (!formData.name || !formData.location || !formData.description || formData.selectedServices.length === 0) {
-      alert('Please fill in all required fields');
+    if (!formData.name || !formData.location || !formData.description ||
+        formData.selectedServices.length === 0 || formData.selectedResources.length === 0) {
+      alert('Please fill in all required fields and select at least one service and one resource');
       setIsSubmitting(false);
       return;
     }
@@ -102,6 +116,7 @@ export function AddCenterForm({ onAddCenter, isAdmin }: AddCenterFormProps) {
       location: formData.location,
       coordinates: formData.coordinates,
       services: formData.selectedServices,
+      resources: formData.selectedResources,
       description: formData.description,
       addedBy: isAdmin ? 'admin' : 'visitor',
       contactInfo: {
@@ -119,6 +134,7 @@ export function AddCenterForm({ onAddCenter, isAdmin }: AddCenterFormProps) {
       location: '',
       description: '',
       selectedServices: [],
+      selectedResources: [],
       phone: '',
       email: '',
       website: '',
@@ -131,6 +147,15 @@ export function AddCenterForm({ onAddCenter, isAdmin }: AddCenterFormProps) {
 
   return (
     <div className="max-w-2xl mx-auto">
+      <Button
+        variant="ghost"
+        onClick={onBack}
+        className="mb-4"
+      >
+        <ArrowLeft className="h-4 w-4 mr-2" />
+        Back to Map
+      </Button>
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
@@ -209,6 +234,35 @@ export function AddCenterForm({ onAddCenter, isAdmin }: AddCenterFormProps) {
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Resources Available */}
+            <div className="space-y-4">
+              <h3 className="text-lg">Resources Available *</h3>
+              <p className="text-sm text-gray-600">Select all resources that this center has available:</p>
+
+              {/* Grouped by Category */}
+              {(Object.keys(availableResources) as ResourceCategory[]).map((categoryKey) => (
+                <div key={categoryKey} className="mb-6">
+                  <h4 className="text-md font-semibold mb-3 text-gray-700 dark:text-gray-300">
+                    {resourceCategories[categoryKey]}
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {availableResources[categoryKey].map((resource) => (
+                      <div key={resource} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`resource-${resource}`}
+                          checked={formData.selectedResources.includes(resource)}
+                          onCheckedChange={() => handleResourceToggle(resource)}
+                        />
+                        <Label htmlFor={`resource-${resource}`} className="text-sm cursor-pointer">
+                          {resource}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
 
             {/* Contact Information */}

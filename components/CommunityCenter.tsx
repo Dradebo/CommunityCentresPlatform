@@ -18,7 +18,8 @@ import {
   Link,
   ArrowLeft,
   MessageSquare,
-  ExternalLink
+  ExternalLink,
+  Building
 } from 'lucide-react';
 
 interface CommunityCenterData {
@@ -27,6 +28,7 @@ interface CommunityCenterData {
   location: string;
   coordinates: { lat: number; lng: number };
   services: string[];
+  resources: string[];
   description: string;
   verified: boolean;
   connections: string[];
@@ -178,6 +180,25 @@ export function CommunityCenter({ center, allCenters, onConnectCenter, onSendCon
               {center.services.map(service => (
                 <Badge key={service} variant="secondary">{service}</Badge>
               ))}
+            </div>
+          </div>
+
+          {/* Resources Available */}
+          <div>
+            <h3 className="text-lg mb-3 flex items-center space-x-2">
+              <Building className="h-5 w-5" />
+              <span>Resources Available</span>
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {center.resources && center.resources.length > 0 ? (
+                center.resources.map(resource => (
+                  <Badge key={resource} variant="outline" className="border-purple-500 text-purple-700 dark:border-purple-400 dark:text-purple-300">
+                    {resource}
+                  </Badge>
+                ))
+              ) : (
+                <p className="text-gray-500 text-sm">No resources listed</p>
+              )}
             </div>
           </div>
 

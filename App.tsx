@@ -34,6 +34,7 @@ interface CommunityCenterData {
   location: string;
   coordinates: { lat: number; lng: number };
   services: string[];
+  resources: string[];
   description: string;
   verified: boolean;
   connections: string[];
@@ -48,6 +49,7 @@ interface CommunityCenterData {
 interface FilterCriteria {
   searchQuery: string;
   selectedServices: string[];
+  selectedResources: string[];
   selectedLocations: string[];
   verificationStatus: 'all' | 'verified' | 'unverified';
   connectionStatus: 'all' | 'connected' | 'standalone';
@@ -95,6 +97,7 @@ function AppContent() {
   const [activeFilters, setActiveFilters] = useState<FilterCriteria>({
     searchQuery: '',
     selectedServices: [],
+    selectedResources: [],
     selectedLocations: [],
     verificationStatus: 'all',
     connectionStatus: 'all',
@@ -509,8 +512,9 @@ function AppContent() {
         )}
 
         {currentView === 'add-center' && (
-          <AddCenterForm 
+          <AddCenterForm
             onAddCenter={handleAddCenter}
+            onBack={() => setCurrentView('map')}
             isAdmin={isAdmin}
           />
         )}

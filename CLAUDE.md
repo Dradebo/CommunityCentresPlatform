@@ -1070,5 +1070,3 @@ VITE_GOOGLE_MAPS_API_KEY="AIzaSyD-your-api-key-here"
 - ✅ Protection comes from API key restrictions (domain + API limits), not from hiding the key
 - ⚠️ MUST restrict key to specific domains and APIs in Google Cloud Console
 - ⚠️ Monitor usage regularly to detect abuse
-
-

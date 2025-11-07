@@ -6,17 +6,19 @@ import { Badge } from './ui/badge';
 import { Checkbox } from './ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
-import { 
-  Search, 
-  Filter, 
-  X, 
-  ChevronDown, 
-  ChevronUp, 
-  MapPin, 
-  Users, 
+import {
+  Search,
+  Filter,
+  X,
+  ChevronDown,
+  ChevronUp,
+  MapPin,
+  Users,
   CheckCircle,
-  AlertTriangle
+  AlertTriangle,
+  Building
 } from 'lucide-react';
+import { availableResources, resourceCategories, ResourceCategory } from '../utils/resources';
 
 interface CommunityCenterData {
   id: string;
@@ -24,6 +26,7 @@ interface CommunityCenterData {
   location: string;
   coordinates: { lat: number; lng: number };
   services: string[];
+  resources?: string[];
   description: string;
   verified: boolean;
   connections: string[];
@@ -38,6 +41,7 @@ interface CommunityCenterData {
 interface FilterCriteria {
   searchQuery: string;
   selectedServices: string[];
+  selectedResources: string[];
   selectedLocations: string[];
   verificationStatus: 'all' | 'verified' | 'unverified';
   connectionStatus: 'all' | 'connected' | 'standalone';
@@ -79,6 +83,7 @@ export function SearchAndFilter({ centers, onFilterChange }: SearchAndFilterProp
   const [filters, setFilters] = useState<FilterCriteria>({
     searchQuery: '',
     selectedServices: [],
+    selectedResources: [],
     selectedLocations: [],
     verificationStatus: 'all',
     connectionStatus: 'all',
@@ -93,11 +98,12 @@ export function SearchAndFilter({ centers, onFilterChange }: SearchAndFilterProp
     // Text search
     if (newFilters.searchQuery.trim()) {
       const query = newFilters.searchQuery.toLowerCase();
-      filteredCenters = filteredCenters.filter(center => 
+      filteredCenters = filteredCenters.filter(center =>
         center.name.toLowerCase().includes(query) ||
         center.location.toLowerCase().includes(query) ||
         center.description.toLowerCase().includes(query) ||
-        center.services.some(service => service.toLowerCase().includes(query))
+        center.services.some(service => service.toLowerCase().includes(query)) ||
+        center.resources?.some(resource => resource.toLowerCase().includes(query))
       );
     }
 
@@ -105,6 +111,13 @@ export function SearchAndFilter({ centers, onFilterChange }: SearchAndFilterProp
     if (newFilters.selectedServices.length > 0) {
       filteredCenters = filteredCenters.filter(center =>
         newFilters.selectedServices.some(service => center.services.includes(service))
+      );
+    }
+
+    // Resource filters
+    if (newFilters.selectedResources.length > 0) {
+      filteredCenters = filteredCenters.filter(center =>
+        newFilters.selectedResources.some(resource => center.resources?.includes(resource))
       );
     }
 
@@ -161,10 +174,18 @@ export function SearchAndFilter({ centers, onFilterChange }: SearchAndFilterProp
     handleFilterChange('selectedLocations', newLocations);
   };
 
+  const handleResourceToggle = (resource: string) => {
+    const newResources = filters.selectedResources.includes(resource)
+      ? filters.selectedResources.filter(r => r !== resource)
+      : [...filters.selectedResources, resource];
+    handleFilterChange('selectedResources', newResources);
+  };
+
   const clearAllFilters = () => {
     const emptyFilters: FilterCriteria = {
       searchQuery: '',
       selectedServices: [],
+      selectedResources: [],
       selectedLocations: [],
       verificationStatus: 'all',
       connectionStatus: 'all',
@@ -174,9 +195,10 @@ export function SearchAndFilter({ centers, onFilterChange }: SearchAndFilterProp
     applyFilters(emptyFilters);
   };
 
-  const hasActiveFilters = 
+  const hasActiveFilters =
     filters.searchQuery.trim() !== '' ||
     filters.selectedServices.length > 0 ||
+    filters.selectedResources.length > 0 ||
     filters.selectedLocations.length > 0 ||
     filters.verificationStatus !== 'all' ||
     filters.connectionStatus !== 'all' ||
@@ -185,6 +207,7 @@ export function SearchAndFilter({ centers, onFilterChange }: SearchAndFilterProp
   const activeFilterCount = [
     filters.searchQuery.trim() !== '',
     filters.selectedServices.length > 0,
+    filters.selectedResources.length > 0,
     filters.selectedLocations.length > 0,
     filters.verificationStatus !== 'all',
     filters.connectionStatus !== 'all',
@@ -240,6 +263,12 @@ export function SearchAndFilter({ centers, onFilterChange }: SearchAndFilterProp
               <X className="h-3 w-3 ml-1" onClick={() => handleServiceToggle(service)} />
             </Badge>
           ))}
+          {filters.selectedResources.map(resource => (
+            <Badge key={resource} variant="default" className="cursor-pointer bg-purple-600">
+              {resource}
+              <X className="h-3 w-3 ml-1" onClick={() => handleResourceToggle(resource)} />
+            </Badge>
+          ))}
           {filters.selectedLocations.map(location => (
             <Badge key={location} variant="outline" className="cursor-pointer">
               <MapPin className="h-3 w-3 mr-1" />
@@ -272,6 +301,35 @@ export function SearchAndFilter({ centers, onFilterChange }: SearchAndFilterProp
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Resources Filter */}
+            <div>
+              <h4 className="mb-3 flex items-center space-x-2">
+                <Building className="h-4 w-4" />
+                <span>Resources</span>
+              </h4>
+              {(Object.keys(availableResources) as ResourceCategory[]).map((categoryKey) => (
+                <div key={categoryKey} className="mb-4">
+                  <h5 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    {resourceCategories[categoryKey]}
+                  </h5>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {availableResources[categoryKey].map((resource) => (
+                      <div key={resource} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`filter-${resource}`}
+                          checked={filters.selectedResources.includes(resource)}
+                          onCheckedChange={() => handleResourceToggle(resource)}
+                        />
+                        <label htmlFor={`filter-${resource}`} className="text-sm cursor-pointer">
+                          {resource}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
 
             {/* Location Filter */}
