@@ -56,7 +56,9 @@ CommunityCentresPlatform/
 ### Key Data Models (Go Backend)
 
 - **User**: Authentication with role-based access (ADMIN, CENTER_MANAGER, VISITOR, ENTREPRENEUR)
-- **CommunityCenter**: Center data with coordinates, services, verification status
+- **CommunityCenter**: Center data with coordinates, services, **resources available**, verification status
+  - Services: What the center DOES (Healthcare, Education, Skills Training, etc.)
+  - Resources: What the center HAS (facilities, equipment, personnel, funding)
 - **Connection**: Bidirectional relationships between centers with collaboration types and descriptions
 - **MessageThread/CenterMessage**: Real-time messaging system between verified centers
 - **ContactMessage**: Public inquiry system for visitors to contact centers
@@ -153,6 +155,55 @@ CommunityCentresPlatform/
 - Implemented complete Google OAuth SSO with credential flow
 - Fixed dark mode background issue (main app container now properly switches to dark:bg-gray-900)
 - All changes committed to main branch (commit 51b06b7 for Google OAuth)
+
+**Resources Available Feature** ✅ COMPLETE (November 7, 2025):
+
+**Backend (Go):**
+- Added Resources field to CommunityCenter model (TEXT[] array using StringArray type)
+- Updated centerRequest struct to require resources (min=1 validation)
+- Updated all API handlers to accept, store, and return resources array
+- Endpoints modified: POST /api/centers, GET /api/centers, GET /api/centers/:id
+
+**Frontend Constants:**
+- Created [utils/resources.ts](utils/resources.ts) - Single source of truth for all resource options
+- 60+ resources organized into 4 categories:
+  1. Physical Infrastructure & Tangible Assets (23 items)
+  2. Digital & Information Resources (8 items)
+  3. Human Resources & Specialized Personnel (16 items)
+  4. Financial Resources (5 items)
+- Exported types: ResourceCategory, ResourceType for type safety
+
+**Frontend Components:**
+- Updated [components/AddCenterForm.tsx](components/AddCenterForm.tsx):
+  - Added resources checkboxes grouped by 4 categories
+  - Form validation requires at least one service AND one resource
+  - Added "Back to Map" navigation button
+- Updated [components/CommunityCenter.tsx](components/CommunityCenter.tsx):
+  - Added "Resources Available" section with Building icon
+  - Purple badges for resources (distinct from gray service badges)
+- Updated [components/SearchAndFilter.tsx](components/SearchAndFilter.tsx):
+  - Added resource filtering with OR logic (match at least one selected resource)
+  - Resources included in text search queries
+  - Purple filter badges with resource count
+  - Category-grouped resource checkboxes in advanced filters
+- Updated [components/CenterCard.tsx](components/CenterCard.tsx):
+  - Added resource count badge with Building icon and purple color scheme
+
+**Data Flow:**
+- TypeScript interfaces updated across all 9+ components (App.tsx, AddCenterForm, CommunityCenter, SearchAndFilter, CenterCard)
+- FilterCriteria interface includes selectedResources array
+- CommunityCenterData interface includes resources field
+
+**Design Patterns:**
+- Purple color scheme for resources (border-purple-500, text-purple-700, bg-purple-600)
+- Distinct from gray color scheme used for services
+- OR-based filtering logic (same as services)
+- Category grouping for better UX with collapsible sections
+
+**Build Verification:**
+- ✅ TypeScript compilation: PASSED (no errors)
+- ✅ Go backend build: SUCCESS (compiled cleanly)
+- ✅ Production frontend build: SUCCESS (814.84 kB bundle)
 
 ### Pending Work
 

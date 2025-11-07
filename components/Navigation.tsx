@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { ThemeToggle } from './ThemeToggle';
-import { MapPin, Shield, Plus, Map, MessageSquare, User, LogOut, Briefcase, LayoutDashboard } from 'lucide-react';
+import { MapPin, Shield, Plus, Map, MessageSquare, User, LogOut, Briefcase, LayoutDashboard, Clock } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 interface User {
@@ -15,7 +15,7 @@ interface User {
 
 interface NavigationProps {
   currentView: string;
-  setCurrentView: (view: 'map' | 'admin' | 'add-center' | 'center-detail' | 'messages' | 'entrepreneur-dashboard' | 'entrepreneur-profile' | 'entrepreneur-register') => void;
+  setCurrentView: (view: 'map' | 'admin' | 'add-center' | 'center-detail' | 'messages' | 'entrepreneur-dashboard' | 'entrepreneur-profile' | 'entrepreneur-register' | 'profile' | 'admin-requests') => void;
   user: User | null;
   onAuthRequired: () => void;
 }
@@ -154,6 +154,26 @@ export function Navigation({ currentView, setCurrentView, user, onAuthRequired }
                     <span className="hidden md:inline">Dashboard</span>
                   </Button>
                 )}
+
+                {isAdmin && (
+                  <Button
+                    variant={currentView === 'admin-requests' ? 'default' : 'ghost'}
+                    onClick={() => setCurrentView('admin-requests')}
+                    className="flex items-center space-x-2"
+                  >
+                    <Clock className="h-4 w-4" />
+                    <span className="hidden lg:inline">Upgrade Requests</span>
+                  </Button>
+                )}
+
+                <Button
+                  variant={currentView === 'profile' ? 'default' : 'ghost'}
+                  onClick={() => setCurrentView('profile')}
+                  className="flex items-center space-x-2"
+                >
+                  <User className="h-4 w-4" />
+                  <span className="hidden lg:inline">Profile</span>
+                </Button>
 
                 <div className="flex items-center space-x-2">
                   <div className="hidden lg:block text-right">

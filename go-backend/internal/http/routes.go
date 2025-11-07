@@ -95,6 +95,15 @@ func RegisterRoutes(r *gin.Engine, d Deps) {
 		services.GET("/:id", AuthMiddleware(d.JWTSecret), handlers.GetServiceProvision)
 		services.PUT("/:id", AuthMiddleware(d.JWTSecret), RequireRole("ADMIN", "CENTER_MANAGER"), handlers.UpdateServiceProvision)
 	}
+
+	// /api/role-upgrades
+	roleUpgrades := api.Group("/role-upgrades")
+	{
+		roleUpgrades.POST("/", AuthMiddleware(d.JWTSecret), handlers.CreateRoleUpgradeRequest)
+		roleUpgrades.GET("/me", AuthMiddleware(d.JWTSecret), handlers.GetMyUpgradeRequest)
+		roleUpgrades.GET("/", AuthMiddleware(d.JWTSecret), RequireRole("ADMIN"), handlers.ListUpgradeRequests)
+		roleUpgrades.PUT("/:id/review", AuthMiddleware(d.JWTSecret), RequireRole("ADMIN"), handlers.ReviewUpgradeRequest)
+	}
 }
 
 // NotImplemented is a placeholder for yet-to-be-built handlers

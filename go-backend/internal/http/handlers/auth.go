@@ -1,16 +1,20 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 
 	"communitycentresplatform/go-backend/internal/auth"
 	"communitycentresplatform/go-backend/internal/db"
-    "communitycentresplatform/go-backend/internal/ctxutil"
+	"communitycentresplatform/go-backend/internal/ctxutil"
 )
 
 type registerRequest struct {
@@ -205,19 +209,27 @@ func GoogleVerify(c *gin.Context) {
 	result := gdb.Where("google_id = ?", googleUser.GoogleID).Or("email = ?", googleUser.Email).First(&user)
 
 	if result.Error != nil {
-		// User doesn't exist - create new user
-		user = db.User{
-			Email:        googleUser.Email,
-			Password:     "", // Google OAuth users don't have passwords
-			Name:         googleUser.Name,
-			Role:         db.RoleVisitor,
-			Verified:     true, // Google accounts are pre-verified
-			GoogleID:     &googleUser.GoogleID,
-			PictureURL:   &googleUser.Picture,
-			AuthProvider: "GOOGLE",
-		}
-		if err := gdb.Create(&user).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create user"})
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			// User doesn't exist - create new user
+			user = db.User{
+				Email:        googleUser.Email,
+				Password:     uuid.New().String(), // Random UUID (unusable for login)
+				Name:         googleUser.Name,
+				Role:         db.RoleVisitor,
+				Verified:     true, // Google accounts are pre-verified
+				GoogleID:     &googleUser.GoogleID,
+				PictureURL:   &googleUser.Picture,
+				AuthProvider: "GOOGLE",
+			}
+			if err := gdb.Create(&user).Error; err != nil {
+				log.Printf("Failed to create Google user: %v", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to create user: %s", err.Error())})
+				return
+			}
+		} else {
+			// Database error (not "not found")
+			log.Printf("Database error during Google auth: %v", result.Error)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "database error"})
 			return
 		}
 	} else {

@@ -45,6 +45,14 @@ const (
 	ServiceCancelled ServiceProvisionStatus = "CANCELLED"
 )
 
+type RoleUpgradeRequestStatus string
+
+const (
+	UpgradeRequestPending  RoleUpgradeRequestStatus = "PENDING"
+	UpgradeRequestApproved RoleUpgradeRequestStatus = "APPROVED"
+	UpgradeRequestRejected RoleUpgradeRequestStatus = "REJECTED"
+)
+
 // StringArray type for PostgreSQL TEXT[] arrays (services field)
 type StringArray []string
 
@@ -334,6 +342,37 @@ func (s *ServiceProvision) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
+// RoleUpgradeRequest model - requests for role upgrades requiring admin approval
+type RoleUpgradeRequest struct {
+	ID            uuid.UUID                `gorm:"type:uuid;primaryKey;column:id"`
+	UserID        uuid.UUID                `gorm:"type:uuid;not null;index;column:user_id"`
+	CurrentRole   Role                     `gorm:"type:varchar(20);not null;column:current_role"`
+	RequestedRole Role                     `gorm:"type:varchar(20);not null;column:requested_role"`
+	CenterID      *uuid.UUID               `gorm:"type:uuid;column:center_id"` // For CENTER_MANAGER requests
+	Justification string                   `gorm:"type:text;not null;column:justification"`
+	Status        RoleUpgradeRequestStatus `gorm:"type:varchar(20);not null;default:'PENDING';column:status"`
+	ReviewedBy    *uuid.UUID               `gorm:"type:uuid;column:reviewed_by"` // Admin who reviewed
+	ReviewNotes   *string                  `gorm:"type:text;column:review_notes"`
+	CreatedAt     time.Time                `gorm:"column:created_at"`
+	UpdatedAt     time.Time                `gorm:"column:updated_at"`
+
+	// Relations
+	User           User             `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	Center         *CommunityCenter `gorm:"foreignKey:CenterID"`
+	ReviewedByUser *User            `gorm:"foreignKey:ReviewedBy"`
+}
+
+func (RoleUpgradeRequest) TableName() string {
+	return "role_upgrade_requests"
+}
+
+func (r *RoleUpgradeRequest) BeforeCreate(tx *gorm.DB) error {
+	if r.ID == uuid.Nil {
+		r.ID = uuid.New()
+	}
+	return nil
+}
+
 // AutoMigrate runs migrations for all models
 func AutoMigrate(gdb *gorm.DB) error {
 	return gdb.AutoMigrate(
@@ -346,6 +385,7 @@ func AutoMigrate(gdb *gorm.DB) error {
 		&Entrepreneur{},
 		&HubEnrollment{},
 		&ServiceProvision{},
+		&RoleUpgradeRequest{},
 	)
 }
 

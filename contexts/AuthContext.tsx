@@ -8,13 +8,17 @@ interface User {
   name: string;
   role: 'ADMIN' | 'CENTER_MANAGER' | 'VISITOR' | 'ENTREPRENEUR';
   verified: boolean;
+  pictureUrl?: string;
+  authProvider?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  loginWithGoogle: (credential: string) => Promise<void>;
+  loginWithGoogle: (credential: string) => Promise<any>;
   register: (userData: {
     email: string;
     password: string;
@@ -22,6 +26,7 @@ interface AuthContextType {
     role?: 'VISITOR' | 'CENTER_MANAGER' | 'ENTREPRENEUR';
   }) => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
   isAuthenticated: boolean;
   isAdmin: boolean;
   isCenterManager: boolean;
@@ -127,6 +132,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(null);
   };
 
+  const refreshUser = async () => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) return;
+
+      // Re-fetch user data by validating the token
+      await checkAuthStatus();
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+    }
+  };
+
   const value: AuthContextType = {
     user,
     loading,
@@ -134,6 +151,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     loginWithGoogle,
     register,
     logout,
+    refreshUser,
     isAuthenticated: !!user,
     isAdmin: user?.role === 'ADMIN',
     isCenterManager: user?.role === 'CENTER_MANAGER' || user?.role === 'ADMIN',

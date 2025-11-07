@@ -12,6 +12,9 @@ import { RegisterForm } from './components/auth/RegisterForm';
 import { EntrepreneurRegistrationForm } from './components/entrepreneur/EntrepreneurRegistrationForm';
 import { EntrepreneurDashboard } from './components/entrepreneur/EntrepreneurDashboard';
 import { EntrepreneurProfile } from './components/entrepreneur/EntrepreneurProfile';
+import { UserProfile } from './components/profile/UserProfile';
+import { CenterManagerProfile } from './components/profile/CenterManagerProfile';
+import { RoleUpgradeRequests } from './components/admin/RoleUpgradeRequests';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { Button } from './components/ui/button';
@@ -91,7 +94,7 @@ interface MessageThread {
 
 function AppContent() {
   const { user, loading: authLoading, isAdmin, isAuthenticated } = useAuth();
-  const [currentView, setCurrentView] = useState<'map' | 'admin' | 'add-center' | 'center-detail' | 'messages' | 'entrepreneur-dashboard' | 'entrepreneur-profile' | 'entrepreneur-register'>('map');
+  const [currentView, setCurrentView] = useState<'map' | 'admin' | 'add-center' | 'center-detail' | 'messages' | 'entrepreneur-dashboard' | 'entrepreneur-profile' | 'entrepreneur-register' | 'profile' | 'admin-requests'>('map');
   const [selectedCenter, setSelectedCenter] = useState<string | null>(null);
   const [filteredCenters, setFilteredCenters] = useState<CommunityCenterData[]>([]);
   const [activeFilters, setActiveFilters] = useState<FilterCriteria>({
@@ -602,6 +605,22 @@ function AppContent() {
             onComplete={() => setCurrentView('entrepreneur-dashboard')}
             onCancel={() => setCurrentView('map')}
           />
+        )}
+
+        {currentView === 'profile' && user && (
+          <>
+            {user.role === 'CENTER_MANAGER' ? (
+              <CenterManagerProfile />
+            ) : user.role === 'ENTREPRENEUR' ? (
+              <EntrepreneurProfile entrepreneurId={user.id} />
+            ) : (
+              <UserProfile />
+            )}
+          </>
+        )}
+
+        {currentView === 'admin-requests' && user?.role === 'ADMIN' && (
+          <RoleUpgradeRequests />
         )}
       </main>
     </div>

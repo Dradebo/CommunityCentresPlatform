@@ -278,6 +278,56 @@ class APIService {
   isAuthenticated(): boolean {
     return !!this.getAuthToken();
   }
+
+  // Role upgrade request methods
+  async createRoleUpgradeRequest(data: {
+    requestedRole: string;
+    centerId?: string;
+    justification: string;
+  }) {
+    const response = await fetch(`${API_BASE_URL}/role-upgrades`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+
+    return this.handleResponse(response);
+  }
+
+  async getMyUpgradeRequest() {
+    const response = await fetch(`${API_BASE_URL}/role-upgrades/me`, {
+      method: 'GET',
+      headers: this.getAuthHeaders(),
+    });
+
+    return this.handleResponse(response);
+  }
+
+  async getRoleUpgradeRequests(status?: string) {
+    const url = status
+      ? `${API_BASE_URL}/role-upgrades?status=${status}`
+      : `${API_BASE_URL}/role-upgrades`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: this.getAuthHeaders(),
+    });
+
+    return this.handleResponse(response);
+  }
+
+  async reviewRoleUpgradeRequest(requestId: string, data: {
+    action: 'approve' | 'reject';
+    notes?: string;
+  }) {
+    const response = await fetch(`${API_BASE_URL}/role-upgrades/${requestId}/review`, {
+      method: 'PUT',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+
+    return this.handleResponse(response);
+  }
 }
 
 export const apiService = new APIService();
