@@ -126,7 +126,7 @@ export function LocationPicker({ initialLocation, onLocationSelect, className = 
     };
 
     initMap();
-  }, [initialLocation]);
+  }, []); // Only initialize once, don't reinitialize when initialLocation changes
 
   // Cleanup on unmount
   useEffect(() => {

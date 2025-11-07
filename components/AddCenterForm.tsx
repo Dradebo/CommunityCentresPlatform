@@ -164,6 +164,7 @@ export function AddCenterForm({ onAddCenter, isAdmin }: AddCenterFormProps) {
               <div>
                 <Label>Location *</Label>
                 <LocationPicker
+                  key={`location-picker-${formData.coordinates.lat}-${formData.coordinates.lng}`}
                   initialLocation={formData.coordinates}
                   onLocationSelect={handleLocationSelect}
                   className="mt-2"

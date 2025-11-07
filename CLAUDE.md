@@ -972,11 +972,14 @@ Use `bd list` to view all issues and `bd show bd-18` for detailed Phase A2-A6 pl
    - Added `addedBy: { role: center.addedBy.toUpperCase() }` transformation
    - Pins now correctly show: Green (verified), Blue (admin-added), Gray (pending)
 
-2. **Add Center Form Map Display** (components/LocationPicker.tsx):
+2. **Add Center Form Map Display** (components/LocationPicker.tsx + components/AddCenterForm.tsx):
    - Fixed map not appearing in Add Center Form
-   - Added comprehensive cleanup effect (lines 129-153) to clear refs on unmount
+   - **Root cause:** useEffect had `initialLocation` in dependency array causing constant reinitialization
+   - **Fix 1:** Removed `initialLocation` from dependency array (line 129) - map now initializes once only
+   - **Fix 2:** Added key prop to LocationPicker in AddCenterForm (line 167) for fresh instances
+   - Added comprehensive cleanup effect (lines 131-153) to clear refs on unmount
    - Added debug logging for troubleshooting
-   - Map now displays correctly when adding new centers
+   - Map now displays correctly and remains functional when adding new centers
 
 **Phase 2: UX Enhancements** ✅ COMPLETE
 
