@@ -12,6 +12,7 @@ interface User {
   authProvider?: string;
   createdAt: string;  // Required - always sent from backend
   updatedAt: string;  // Required - always sent from backend
+  isNewAccount?: boolean;  // Indicates if this is a newly created account
 }
 
 interface AuthContextType {

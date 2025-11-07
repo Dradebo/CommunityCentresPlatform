@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -6,34 +6,63 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Alert, AlertDescription } from '../ui/alert';
 import { useAuth } from '../../contexts/AuthContext';
 import { GoogleLoginButton } from './GoogleLoginButton';
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, CheckCircle } from 'lucide-react';
 
 interface LoginFormProps {
   onSwitchToRegister: () => void;
-  onClose?: () => void;
+  onLoginSuccess: () => void; // Required callback - parent MUST close dialog
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister, onClose }) => {
+export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister, onLoginSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+  const [success, setSuccess] = useState(false);
+
   const { login } = useAuth();
+
+  // Clear error state when component mounts
+  useEffect(() => {
+    setError('');
+    setSuccess(false);
+  }, []);
+
+  // Clear error when user starts typing
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+    if (error) setError('');
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+    if (error) setError('');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Clear previous states
     setError('');
+    setSuccess(false);
     setLoading(true);
 
     try {
       await login(email, password);
-      onClose?.();
+
+      // Show brief success indicator
+      setSuccess(true);
+      setLoading(false);
+
+      // Close dialog after brief success indicator
+      setTimeout(() => {
+        onLoginSuccess();
+      }, 500);
     } catch (err: any) {
       setError(err.message || 'Login failed');
-    } finally {
       setLoading(false);
+      setSuccess(false);
     }
   };
 
@@ -50,8 +79,16 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister, onClos
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
+          {success && (
+            <Alert className="border-green-500 bg-green-50 dark:bg-green-900/20">
+              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <AlertDescription className="text-green-600 dark:text-green-400">
+                Successfully signed in!
+              </AlertDescription>
+            </Alert>
+          )}
 
-          <GoogleLoginButton onSuccess={onClose} />
+          <GoogleLoginButton onLoginSuccess={onLoginSuccess} />
 
           <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">
@@ -72,14 +109,15 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister, onClos
                 id="email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={handleEmailChange}
                 className="pl-10"
                 placeholder="your@email.com"
                 required
+                disabled={loading || success}
               />
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
             <div className="relative">
@@ -88,10 +126,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister, onClos
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={handlePasswordChange}
                 className="pl-10 pr-10"
                 placeholder="Your password"
                 required
+                disabled={loading || success}
               />
               <Button
                 type="button"
@@ -105,8 +144,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister, onClos
             </div>
           </div>
           
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Signing In...' : 'Sign In'}
+          <Button type="submit" className="w-full" disabled={loading || success}>
+            {loading && 'Signing In...'}
+            {success && 'Success!'}
+            {!loading && !success && 'Sign In'}
           </Button>
           
           <div className="text-center">

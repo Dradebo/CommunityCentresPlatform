@@ -131,13 +131,14 @@ func Login(c *gin.Context) {
 		"message": "Login successful",
 		"token":   token,
 		"user": gin.H{
-			"id":        user.ID,
-			"email":     user.Email,
-			"name":      user.Name,
-			"role":      user.Role,
-			"verified":  user.Verified,
-			"createdAt": user.CreatedAt,
-			"updatedAt": user.UpdatedAt,
+			"id":           user.ID,
+			"email":        user.Email,
+			"name":         user.Name,
+			"role":         user.Role,
+			"verified":     user.Verified,
+			"createdAt":    user.CreatedAt,
+			"updatedAt":    user.UpdatedAt,
+			"isNewAccount": false, // Existing users logging in are never new accounts
 		},
 	})
 }
@@ -208,11 +209,13 @@ func GoogleVerify(c *gin.Context) {
 
 	// Check if user exists by GoogleID or email
 	var user db.User
+	isNewAccount := false
 	result := gdb.Where("google_id = ?", googleUser.GoogleID).Or("email = ?", googleUser.Email).First(&user)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			// User doesn't exist - create new user
+			isNewAccount = true
 			user = db.User{
 				Email:        googleUser.Email,
 				Password:     uuid.New().String(), // Random UUID (unusable for login)
@@ -263,14 +266,15 @@ func GoogleVerify(c *gin.Context) {
 		"message": "Google sign-in successful",
 		"token":   token,
 		"user": gin.H{
-			"id":         user.ID,
-			"email":      user.Email,
-			"name":       user.Name,
-			"role":       user.Role,
-			"verified":   user.Verified,
-			"pictureURL": user.PictureURL,
-			"createdAt":  user.CreatedAt,
-			"updatedAt":  user.UpdatedAt,
+			"id":           user.ID,
+			"email":        user.Email,
+			"name":         user.Name,
+			"role":         user.Role,
+			"verified":     user.Verified,
+			"pictureURL":   user.PictureURL,
+			"createdAt":    user.CreatedAt,
+			"updatedAt":    user.UpdatedAt,
+			"isNewAccount": isNewAccount,
 		},
 	})
 }

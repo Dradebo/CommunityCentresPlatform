@@ -3,21 +3,24 @@ import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 import { useAuth } from '../../contexts/AuthContext';
 import { Alert, AlertDescription } from '../ui/alert';
 import { WelcomeDialog } from './WelcomeDialog';
+import { CheckCircle } from 'lucide-react';
 
 interface GoogleLoginButtonProps {
-  onSuccess?: () => void;
+  onLoginSuccess: () => void; // Required callback - parent MUST close dialog
 }
 
-export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({ onSuccess }) => {
+export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({ onLoginSuccess }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const [newUserName, setNewUserName] = useState('');
+  const [success, setSuccess] = useState(false);
   const { loginWithGoogle } = useAuth();
 
-  // Clear error state when component mounts/remounts (e.g., when dialog reopens)
+  // Clear error and success state when component mounts
   useEffect(() => {
     setError('');
+    setSuccess(false);
     setLoading(false);
   }, []);
 
@@ -28,7 +31,9 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({ onSuccess 
     }
 
     try {
+      // Clear previous states
       setError('');
+      setSuccess(false);
       setLoading(true);
 
       const response = await loginWithGoogle(credentialResponse.credential);
@@ -41,39 +46,40 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({ onSuccess 
         return;
       }
 
-      // Check if this is a new user (timestamps match = just created)
-      // Add defensive null checks and logging
-      const createdAt = response.user.createdAt;
-      const updatedAt = response.user.updatedAt;
+      // Backend now sends explicit isNewAccount flag
+      const isNewUser = response.user.isNewAccount === true;
 
-      console.log('Google OAuth - User timestamps:', { createdAt, updatedAt });
-
-      const isNewUser = createdAt && updatedAt && (createdAt === updatedAt);
-      console.log('Google OAuth - Is new user:', isNewUser);
+      // Show brief success indicator
+      setSuccess(true);
+      setLoading(false);
 
       if (isNewUser) {
+        // New user: show welcome dialog
         setNewUserName(response.user.name || 'there');
         setShowWelcome(true);
       } else {
-        // Returning user - close dialog immediately
-        onSuccess?.();
+        // Returning user: close dialog immediately after brief success indicator
+        setTimeout(() => {
+          onLoginSuccess();
+        }, 500);
       }
-
-      setLoading(false);
     } catch (err: any) {
       console.error('Google login error:', err);
       setError(err.message || 'Google sign-in failed. Please try again.');
       setLoading(false);
+      setSuccess(false);
     }
   };
 
   const handleError = () => {
     setError('Google sign-in was cancelled or failed');
+    setLoading(false);
+    setSuccess(false);
   };
 
   const handleWelcomeClose = () => {
     setShowWelcome(false);
-    onSuccess?.();
+    onLoginSuccess();
   };
 
   return (
@@ -82,6 +88,14 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({ onSuccess 
         {error && (
           <Alert variant="destructive">
             <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+        {success && (
+          <Alert className="border-green-500 bg-green-50 dark:bg-green-900/20">
+            <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <AlertDescription className="text-green-600 dark:text-green-400">
+              Successfully signed in!
+            </AlertDescription>
           </Alert>
         )}
         {loading && (

@@ -1013,6 +1013,146 @@ Use `bd list` to view all issues and `bd show bd-18` for detailed Phase A2-A6 pl
 - Center A Details → Center B Details: Each gets fresh map ✅
 - Rapid navigation stress test: No missing/duplicate markers ✅
 
+### **Critical Session Issues (November 7, 2025) - UNRESOLVED** ⚠️
+
+**Session Context**: Attempted fixes for Google OAuth login dialog and admin dashboard issues. Made code changes but issues persist in production. Session became ineffective due to inability to test deployed changes in real-time.
+
+#### **Issue 1: Google OAuth Login Dialog Not Dismissing** 🔴 CRITICAL
+**Symptoms**:
+- User logs in with Google OAuth successfully
+- Backend authentication works (user is authenticated)
+- Login dialog shows "Google login failed" error message
+- User must manually dismiss dialog
+- After dismissal, app shows user is logged in correctly
+
+**Root Cause (Confirmed)**:
+1. Backend doesn't return `createdAt`/`updatedAt` timestamps in auth responses
+2. Frontend `GoogleLoginButton.tsx` expects timestamps to detect new vs returning users
+3. Timestamp comparison `createdAt === updatedAt` fails with undefined values
+4. Welcome dialog logic breaks → error shown despite successful login
+
+**Attempted Fixes (November 7)**:
+- ✅ Added timestamps to Go backend responses:
+  - Google OAuth: `go-backend/internal/http/handlers/auth.go` lines 270-271
+  - Regular login: `go-backend/internal/http/handlers/auth.go` lines 139-140
+- ✅ Updated TypeScript User interface: `contexts/AuthContext.tsx` lines 13-14 (made required)
+- ✅ Added error state clearing on mount: `components/auth/GoogleLoginButton.tsx` lines 19-22
+- ✅ Build succeeded (879.97 kB)
+- ❌ Issues persist in production (changes not yet deployed/tested)
+
+**Next Steps for New Session**:
+1. Verify backend deployed to Railway with timestamp changes
+2. Check Railway logs for actual auth response format
+3. Add `console.log(response)` in GoogleLoginButton.tsx line 28 to debug
+4. Test with fresh Google account to verify timestamps work
+5. Check if GORM `Save()` updates `updatedAt` for existing users (may need manual set)
+
+---
+
+#### **Issue 2: Password Input Not Showing Visual Feedback** 🔴 CRITICAL
+**Symptoms**:
+- User types in password field
+- No visible feedback (bullets/dots not appearing)
+- Field appears empty/transparent
+- Actually functional but invisibly broken
+
+**Root Cause (Confirmed)**:
+- Input component uses undefined CSS classes: `bg-input-background`, `dark:bg-input/30`
+- These classes don't exist in `styles/globals.css` or `tailwind.config.js`
+- No background color → transparent input
+- Text may be invisible due to color mismatch with background
+
+**Attempted Fix (November 7)**:
+- ✅ Completely rewrote `components/ui/input.tsx` lines 13-32 with explicit colors:
+  - Light mode: `bg-white`, `text-gray-900`, `border-gray-300`
+  - Dark mode: `bg-gray-800`, `text-gray-100`, `border-gray-600`
+  - Focus ring: `ring-2 ring-primary-500`
+- ✅ Removed all undefined CSS classes
+- ✅ Build succeeded
+- ❌ Not yet verified in production
+
+**Next Steps for New Session**:
+1. Deploy frontend changes to Vercel
+2. Test password input in both light and dark mode
+3. Verify bullets/dots are visible when typing
+4. Check placeholder text visibility
+5. Test across different browsers (Chrome, Firefox, Safari)
+
+---
+
+#### **Issue 3: Admin Dashboard Shows Nothing** 🟡 HIGH PRIORITY
+**Symptoms**:
+- User logs in as ADMIN role
+- Clicks "Admin" in navigation
+- Dashboard view loads but displays no content
+- Unclear if data is missing or rendering is broken
+
+**Investigation Status**: INCOMPLETE (need console logs from user)
+
+**Attempted Fix (November 7)**:
+- ✅ Added debug logging to `components/AdminDashboard.tsx` lines 52-61
+- ❌ User hasn't provided console output yet
+
+**Next Steps for New Session**:
+1. Deploy frontend with debug logging
+2. Login as admin user
+3. Open browser console (F12)
+4. Navigate to Admin view
+5. Check console for log output:
+   ```
+   AdminDashboard mounted with props: {
+     centersCount: X,
+     unverifiedCentersCount: Y,
+     contactMessagesCount: Z,
+     centers: [...],
+     unverifiedCenters: [...],
+     contactMessages: [...]
+   }
+   ```
+6. Diagnose based on counts:
+   - If all counts = 0: Data not loading from backend (API issue)
+   - If counts > 0: Rendering issue in component
+   - If no log at all: Component not mounting (routing issue)
+
+**Possible Root Causes**:
+1. User doesn't actually have ADMIN role (check JWT token payload)
+2. Backend not returning centers/messages data for admin
+3. Component rendering but with empty arrays
+4. Navigation state not switching to admin view correctly
+5. CORS or authentication issue blocking admin API calls
+
+---
+
+### **Development Session Notes**
+
+**Session Duration**: ~2 hours
+**Token Usage**: 109,000 / 200,000
+**Build Status**: ✅ SUCCESS (879.97 kB)
+**Deployment Status**: ⏳ PENDING (changes not yet deployed to Railway/Vercel)
+
+**Code Changes Made (Not Yet Tested in Production)**:
+1. Backend: Added `createdAt`/`updatedAt` to auth responses (2 locations)
+2. Frontend: Fixed input styling with proper visible colors
+3. Frontend: Added error clearing on GoogleLoginButton mount
+4. Frontend: Added debug logging to AdminDashboard
+5. TypeScript: Updated User interface with required timestamp fields
+
+**Why Session Became Ineffective**:
+- Multiple complex issues with interdependencies
+- Unable to test changes without deployment to Railway/Vercel
+- User couldn't provide console logs/debugging info in real-time
+- Context became stale with unverified fixes piling up
+- Need fresh session with deployed changes and actual production testing
+
+**Recommended Next Session Approach**:
+1. Deploy all changes first (Railway + Vercel)
+2. Test each fix individually in production
+3. Gather console logs and network tab data
+4. Use debugging output to guide next steps
+5. Avoid making multiple fixes without testing intermediate state
+
+---
+
 **Recent Session (November 7, 2025) - Complete Google Maps UX Overhaul:**
 
 **Phase 1: Critical Fixes** ✅ COMPLETE

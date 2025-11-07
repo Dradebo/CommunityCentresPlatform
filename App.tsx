@@ -388,7 +388,7 @@ function AppContent() {
           {authMode === 'login' ? (
             <LoginForm
               onSwitchToRegister={() => setAuthMode('register')}
-              onClose={() => setShowAuthDialog(false)}
+              onLoginSuccess={() => setShowAuthDialog(false)}
             />
           ) : (
             <RegisterForm
