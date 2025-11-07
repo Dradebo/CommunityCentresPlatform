@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -47,6 +47,18 @@ interface AdminDashboardProps {
 export function AdminDashboard({ centers, unverifiedCenters, contactMessages = [], onVerifyCenter, onConnectCenters }: AdminDashboardProps) {
   const [selectedCenterForConnection, setSelectedCenterForConnection] = useState<string>('');
   const [connectionTarget, setConnectionTarget] = useState<string>('');
+
+  // Debug logging to help diagnose admin dashboard issues
+  useEffect(() => {
+    console.log('AdminDashboard mounted with props:', {
+      centersCount: centers.length,
+      unverifiedCentersCount: unverifiedCenters.length,
+      contactMessagesCount: contactMessages.length,
+      centers,
+      unverifiedCenters,
+      contactMessages
+    });
+  }, [centers, unverifiedCenters, contactMessages]);
 
   const handleCreateConnection = () => {
     if (selectedCenterForConnection && connectionTarget && selectedCenterForConnection !== connectionTarget) {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 import { useAuth } from '../../contexts/AuthContext';
 import { Alert, AlertDescription } from '../ui/alert';
@@ -14,6 +14,12 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({ onSuccess 
   const [showWelcome, setShowWelcome] = useState(false);
   const [newUserName, setNewUserName] = useState('');
   const { loginWithGoogle } = useAuth();
+
+  // Clear error state when component mounts/remounts (e.g., when dialog reopens)
+  useEffect(() => {
+    setError('');
+    setLoading(false);
+  }, []);
 
   const handleSuccess = async (credentialResponse: CredentialResponse) => {
     if (!credentialResponse.credential) {

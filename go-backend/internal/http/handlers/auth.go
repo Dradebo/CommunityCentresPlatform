@@ -131,11 +131,13 @@ func Login(c *gin.Context) {
 		"message": "Login successful",
 		"token":   token,
 		"user": gin.H{
-			"id":       user.ID,
-			"email":    user.Email,
-			"name":     user.Name,
-			"role":     user.Role,
-			"verified": user.Verified,
+			"id":        user.ID,
+			"email":     user.Email,
+			"name":      user.Name,
+			"role":      user.Role,
+			"verified":  user.Verified,
+			"createdAt": user.CreatedAt,
+			"updatedAt": user.UpdatedAt,
 		},
 	})
 }
@@ -267,6 +269,8 @@ func GoogleVerify(c *gin.Context) {
 			"role":       user.Role,
 			"verified":   user.Verified,
 			"pictureURL": user.PictureURL,
+			"createdAt":  user.CreatedAt,
+			"updatedAt":  user.UpdatedAt,
 		},
 	})
 }

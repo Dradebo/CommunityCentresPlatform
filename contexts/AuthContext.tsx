@@ -10,8 +10,8 @@ interface User {
   verified: boolean;
   pictureUrl?: string;
   authProvider?: string;
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt: string;  // Required - always sent from backend
+  updatedAt: string;  // Required - always sent from backend
 }
 
 interface AuthContextType {
