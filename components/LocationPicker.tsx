@@ -194,7 +194,7 @@ export function LocationPicker({ initialLocation, onLocationSelect, className = 
   }
 
   return (
-    <div className={`flex flex-col ${className}`}>
+    <div className={`h-[550px] flex flex-col ${className}`}>
       {/* Search Box */}
       <div className="mb-4">
         <div className="relative">

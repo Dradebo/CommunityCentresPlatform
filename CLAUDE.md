@@ -972,14 +972,23 @@ Use `bd list` to view all issues and `bd show bd-18` for detailed Phase A2-A6 pl
    - Added `addedBy: { role: center.addedBy.toUpperCase() }` transformation
    - Pins now correctly show: Green (verified), Blue (admin-added), Gray (pending)
 
-2. **Add Center Form Map Display** (components/LocationPicker.tsx + components/AddCenterForm.tsx):
+2. **Add Center Form Map Display** (components/LocationPicker.tsx + components/ui/input.tsx):
    - Fixed map not appearing in Add Center Form
-   - **Root cause:** useEffect had `initialLocation` in dependency array causing constant reinitialization
-   - **Fix 1:** Removed `initialLocation` from dependency array (line 129) - map now initializes once only
-   - **Fix 2:** Added key prop to LocationPicker in AddCenterForm (line 167) for fresh instances
-   - Added comprehensive cleanup effect (lines 131-153) to clear refs on unmount
-   - Added debug logging for troubleshooting
-   - Map now displays correctly and remains functional when adding new centers
+   - **Root cause:** LocationPicker root div had NO explicit height, causing flex layout collapse
+   - **The Problem:**
+     ```tsx
+     <div className="flex flex-col">  // No height = flex-1 can't calculate space
+       <div className="flex-1 min-h-[400px]">  // flex-1 tries to fill undefined space
+         <div ref={mapRef} className="h-full" />  // h-full = 100% of 0px = 0px
+     ```
+   - **Fix 1 (PRIMARY):** Added `h-[550px]` to LocationPicker root div (line 197)
+     - Gives flex container explicit height so children can calculate correctly
+     - 550px = search (80px) + map (400px) + instructions (60px) + spacing (10px)
+   - **Fix 2 (SECONDARY):** Wrapped Input component with React.forwardRef (input.tsx)
+     - Fixes console warning: "Function components cannot be given refs"
+     - Enables Google Places Autocomplete search feature to work
+     - Ref was null before, preventing autocomplete initialization
+   - Map now displays correctly at full 400px height with search functionality
 
 **Phase 2: UX Enhancements** ✅ COMPLETE
 
