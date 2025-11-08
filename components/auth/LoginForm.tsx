@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Alert, AlertDescription } from '../ui/alert';
 import { useAuth } from '../../contexts/AuthContext';
 import { GoogleLoginButton } from './GoogleLoginButton';
-import { Eye, EyeOff, Mail, Lock, CheckCircle } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 
 interface LoginFormProps {
   onSwitchToRegister: () => void;
@@ -19,14 +19,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister, onLogi
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
 
   const { login } = useAuth();
 
   // Clear error state when component mounts
   useEffect(() => {
     setError('');
-    setSuccess(false);
   }, []);
 
   // Clear error when user starts typing
@@ -45,24 +43,17 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister, onLogi
 
     // Clear previous states
     setError('');
-    setSuccess(false);
     setLoading(true);
 
     try {
       await login(email, password);
-
-      // Show brief success indicator
-      setSuccess(true);
       setLoading(false);
 
-      // Close dialog after brief success indicator
-      setTimeout(() => {
-        onLoginSuccess();
-      }, 500);
+      // Close dialog immediately on success
+      onLoginSuccess();
     } catch (err: any) {
       setError(err.message || 'Login failed');
       setLoading(false);
-      setSuccess(false);
     }
   };
 
@@ -77,14 +68,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister, onLogi
           {error && (
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          {success && (
-            <Alert className="border-green-500 bg-green-50 dark:bg-green-900/20">
-              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-              <AlertDescription className="text-green-600 dark:text-green-400">
-                Successfully signed in!
-              </AlertDescription>
             </Alert>
           )}
 
@@ -113,7 +96,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister, onLogi
                 className="pl-10"
                 placeholder="your@email.com"
                 required
-                disabled={loading || success}
+                disabled={loading}
               />
             </div>
           </div>
@@ -130,7 +113,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister, onLogi
                 className="pl-10 pr-10"
                 placeholder="Your password"
                 required
-                disabled={loading || success}
+                disabled={loading}
               />
               <Button
                 type="button"
@@ -143,11 +126,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister, onLogi
               </Button>
             </div>
           </div>
-          
-          <Button type="submit" className="w-full" disabled={loading || success}>
-            {loading && 'Signing In...'}
-            {success && 'Success!'}
-            {!loading && !success && 'Sign In'}
+
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? 'Signing In...' : 'Sign In'}
           </Button>
           
           <div className="text-center">
