@@ -229,9 +229,9 @@ func CreateCenter(c *gin.Context) {
 		website = &req.Website
 	}
 
-	// Parse manager ID if admin
+	// Parse manager ID if admin or center manager
 	var managerID *uuid.UUID
-	if role == "ADMIN" {
+	if role == "ADMIN" || role == "CENTER_MANAGER" {
 		uid, _ := uuid.Parse(userID)
 		managerID = &uid
 	}
@@ -245,7 +245,7 @@ func CreateCenter(c *gin.Context) {
 		Services:    db.StringArray(req.Services),
 		Resources:   db.StringArray(req.Resources),
 		AddedBy:     userID,
-		Verified:    role == "ADMIN",
+		Verified:    role == "ADMIN" || role == "CENTER_MANAGER",
 		ManagerID:   managerID,
 		Phone:       phone,
 		Email:       email,
@@ -258,7 +258,7 @@ func CreateCenter(c *gin.Context) {
 	}
 
 	addedBy := "visitor"
-	if role == "ADMIN" {
+	if role == "ADMIN" || role == "CENTER_MANAGER" {
 		addedBy = "admin"
 	}
 
