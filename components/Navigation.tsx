@@ -15,7 +15,7 @@ interface User {
 
 interface NavigationProps {
   currentView: string;
-  setCurrentView: (view: 'map' | 'admin' | 'add-center' | 'center-detail' | 'messages' | 'entrepreneur-dashboard' | 'entrepreneur-profile' | 'entrepreneur-register' | 'profile' | 'admin-requests') => void;
+  setCurrentView: (view: 'map' | 'admin' | 'add-center' | 'center-detail' | 'messages' | 'entrepreneur-dashboard' | 'entrepreneur-profile' | 'entrepreneur-register' | 'profile' | 'admin-requests' | 'hub-dashboard') => void;
   user: User | null;
   onAuthRequired: () => void;
 }
@@ -59,6 +59,7 @@ export function Navigation({ currentView, setCurrentView, user, onAuthRequired }
   };
 
   const isEntrepreneur = user?.role === 'ENTREPRENEUR';
+  const isCenterManager = user?.role === 'CENTER_MANAGER';
   const canAddCenter = user?.role === 'ADMIN' || user?.role === 'CENTER_MANAGER';
 
   return (
@@ -152,6 +153,17 @@ export function Navigation({ currentView, setCurrentView, user, onAuthRequired }
                   >
                     <LayoutDashboard className="h-4 w-4" />
                     <span className="hidden md:inline">Dashboard</span>
+                  </Button>
+                )}
+
+                {isCenterManager && (
+                  <Button
+                    variant={currentView === 'hub-dashboard' ? 'default' : 'ghost'}
+                    onClick={() => setCurrentView('hub-dashboard')}
+                    className="flex items-center space-x-2"
+                  >
+                    <LayoutDashboard className="h-4 w-4" />
+                    <span className="hidden md:inline">Hub Dashboard</span>
                   </Button>
                 )}
 

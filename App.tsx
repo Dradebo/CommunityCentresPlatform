@@ -15,6 +15,7 @@ import { EntrepreneurProfile } from './components/entrepreneur/EntrepreneurProfi
 import { UserProfile } from './components/profile/UserProfile';
 import { CenterManagerProfile } from './components/profile/CenterManagerProfile';
 import { RoleUpgradeRequests } from './components/admin/RoleUpgradeRequests';
+import { HubDashboard } from './components/HubDashboard';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { Button } from './components/ui/button';
@@ -94,7 +95,7 @@ interface MessageThread {
 
 function AppContent() {
   const { user, loading: authLoading, isAdmin, isAuthenticated } = useAuth();
-  const [currentView, setCurrentView] = useState<'map' | 'admin' | 'add-center' | 'center-detail' | 'messages' | 'entrepreneur-dashboard' | 'entrepreneur-profile' | 'entrepreneur-register' | 'profile' | 'admin-requests'>('map');
+  const [currentView, setCurrentView] = useState<'map' | 'admin' | 'add-center' | 'center-detail' | 'messages' | 'entrepreneur-dashboard' | 'entrepreneur-profile' | 'entrepreneur-register' | 'profile' | 'admin-requests' | 'hub-dashboard'>('map');
   const [selectedCenter, setSelectedCenter] = useState<string | null>(null);
   const [filteredCenters, setFilteredCenters] = useState<CommunityCenterData[]>([]);
   const [activeFilters, setActiveFilters] = useState<FilterCriteria>({
@@ -649,6 +650,16 @@ function AppContent() {
 
         {currentView === 'admin-requests' && user?.role === 'ADMIN' && (
           <RoleUpgradeRequests />
+        )}
+
+        {currentView === 'hub-dashboard' && user?.role === 'CENTER_MANAGER' && (
+          <HubDashboard
+            onNavigate={(view) => setCurrentView(view)}
+            onSelectCenter={(centerId) => {
+              setSelectedCenter(centerId);
+              setCurrentView('center-detail');
+            }}
+          />
         )}
       </main>
     </div>
