@@ -217,6 +217,22 @@ func CreateCenter(c *gin.Context) {
 	userID := ctxutil.UserIDFrom(c)
 	role := ctxutil.RoleFrom(c)
 
+	// Check if CENTER_MANAGER already manages a hub (one hub per manager constraint)
+	if role == "CENTER_MANAGER" {
+		uid, _ := uuid.Parse(userID)
+		var existingCenter db.CommunityCenter
+		if err := gdb.Where("manager_id = ?", uid).First(&existingCenter).Error; err == nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "You already manage a community center",
+				"existingCenter": gin.H{
+					"id":   existingCenter.ID,
+					"name": existingCenter.Name,
+				},
+			})
+			return
+		}
+	}
+
 	// Handle optional contact fields
 	var phone, email, website *string
 	if req.Phone != "" {
@@ -245,7 +261,7 @@ func CreateCenter(c *gin.Context) {
 		Services:    db.StringArray(req.Services),
 		Resources:   db.StringArray(req.Resources),
 		AddedBy:     userID,
-		Verified:    role == "ADMIN" || role == "CENTER_MANAGER",
+		Verified:    role == "ADMIN", // Only ADMIN-created centers are auto-verified
 		ManagerID:   managerID,
 		Phone:       phone,
 		Email:       email,

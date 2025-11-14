@@ -104,6 +104,16 @@ func RegisterRoutes(r *gin.Engine, d Deps) {
 		roleUpgrades.GET("/", AuthMiddleware(d.JWTSecret), RequireRole("ADMIN"), handlers.ListUpgradeRequests)
 		roleUpgrades.PUT("/:id/review", AuthMiddleware(d.JWTSecret), RequireRole("ADMIN"), handlers.ReviewUpgradeRequest)
 	}
+
+	// /api/activities
+	activities := api.Group("/activities")
+	{
+		activities.POST("/", AuthMiddleware(d.JWTSecret), RequireRole("CENTER_MANAGER"), handlers.CreateActivity)
+		activities.GET("/hub/:id", handlers.GetHubActivities) // Public
+		activities.PUT("/:id", AuthMiddleware(d.JWTSecret), handlers.UpdateActivity)
+		activities.DELETE("/:id", AuthMiddleware(d.JWTSecret), handlers.DeleteActivity)
+		activities.PATCH("/:id/pin", AuthMiddleware(d.JWTSecret), RequireRole("CENTER_MANAGER"), handlers.PinActivity)
+	}
 }
 
 // NotImplemented is a placeholder for yet-to-be-built handlers

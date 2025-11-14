@@ -7,6 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { ContactCenterForm } from './ContactCenterForm';
 import { CenterMessaging } from './CenterMessaging';
 import { GoogleMap } from './GoogleMap';
+import { ActivityFeed } from './ActivityFeed';
+import { PostActivityDialog } from './PostActivityDialog';
+import { useAuth } from '../contexts/AuthContext';
 import {
   MapPin,
   Phone,
@@ -62,6 +65,12 @@ interface CommunityCenterProps {
 export function CommunityCenter({ center, allCenters, onConnectCenter, onSendContactMessage, onBackToMap, isAdmin }: CommunityCenterProps) {
   const [connectionTarget, setConnectionTarget] = useState<string>('');
   const [showConnectionDialog, setShowConnectionDialog] = useState(false);
+  const [showPostActivityDialog, setShowPostActivityDialog] = useState(false);
+  const [activityFeedKey, setActivityFeedKey] = useState(0);
+  const { user } = useAuth();
+
+  // Check if user is the manager of this hub (CENTER_MANAGER role + their hub)
+  const isManager = user?.role === 'CENTER_MANAGER' && isAdmin === false;
 
   const connectedCenters = center.connections.map(connectionId => 
     allCenters.find(c => c.id === connectionId)
@@ -79,6 +88,11 @@ export function CommunityCenter({ center, allCenters, onConnectCenter, onSendCon
       setConnectionTarget('');
       setShowConnectionDialog(false);
     }
+  };
+
+  const handleActivityPosted = () => {
+    // Trigger ActivityFeed refresh by changing its key
+    setActivityFeedKey(prev => prev + 1);
   };
 
   return (
@@ -291,6 +305,22 @@ export function CommunityCenter({ center, allCenters, onConnectCenter, onSendCon
           )}
         </CardContent>
       </Card>
+
+      {/* Activity Feed */}
+      <ActivityFeed
+        key={activityFeedKey}
+        hubId={center.id}
+        isManager={isManager}
+        onPostClick={() => setShowPostActivityDialog(true)}
+      />
+
+      {/* Post Activity Dialog */}
+      <PostActivityDialog
+        isOpen={showPostActivityDialog}
+        onClose={() => setShowPostActivityDialog(false)}
+        hubId={center.id}
+        onSuccess={handleActivityPosted}
+      />
 
       {/* Location Map */}
       <Card>

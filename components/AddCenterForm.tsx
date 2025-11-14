@@ -142,7 +142,13 @@ export function AddCenterForm({ onAddCenter, onBack, isAdmin }: AddCenterFormPro
     });
 
     setIsSubmitting(false);
-    alert('Community center added successfully!');
+
+    // Show appropriate success message based on user role
+    if (isAdmin) {
+      alert('Community center created and verified successfully!');
+    } else {
+      alert('Community center created successfully! Your center is pending admin verification.');
+    }
   };
 
   return (

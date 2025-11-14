@@ -342,6 +342,54 @@ func (s *ServiceProvision) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
+// ActivityType enum for hub activities
+type ActivityType string
+
+const (
+	ActivityEnrollment    ActivityType = "ENROLLMENT"
+	ActivityService       ActivityType = "SERVICE"
+	ActivityCollaboration ActivityType = "COLLABORATION"
+	ActivityAnnouncement  ActivityType = "ANNOUNCEMENT"
+	ActivityConnection    ActivityType = "CONNECTION"
+)
+
+// HubActivity model - social feed activities for community centers
+type HubActivity struct {
+	ID                 uuid.UUID    `gorm:"type:uuid;primaryKey;column:id"`
+	HubID              uuid.UUID    `gorm:"type:uuid;not null;index;column:hub_id"`
+	Type               ActivityType `gorm:"type:varchar(20);not null;column:type"`
+	Title              string       `gorm:"size:255;not null;column:title"`
+	Description        string       `gorm:"type:text;column:description"`
+	EntrepreneurID     *uuid.UUID   `gorm:"type:uuid;column:entrepreneur_id"`
+	ServiceProvisionID *uuid.UUID   `gorm:"type:uuid;column:service_provision_id"`
+	ConnectionID       *uuid.UUID   `gorm:"type:uuid;column:connection_id"`
+	CollaboratingHubID *uuid.UUID   `gorm:"type:uuid;column:collaborating_hub_id"`
+	ImageURL           *string      `gorm:"size:500;column:image_url"`
+	Pinned             bool         `gorm:"default:false;column:pinned"`
+	CreatedBy          uuid.UUID    `gorm:"type:uuid;not null;column:created_by"`
+	CreatedAt          time.Time    `gorm:"column:created_at;index"`
+	UpdatedAt          time.Time    `gorm:"column:updated_at"`
+
+	// Relations
+	Hub              CommunityCenter   `gorm:"foreignKey:HubID;constraint:OnDelete:CASCADE"`
+	Entrepreneur     *Entrepreneur     `gorm:"foreignKey:EntrepreneurID"`
+	ServiceProvision *ServiceProvision `gorm:"foreignKey:ServiceProvisionID"`
+	Connection       *Connection       `gorm:"foreignKey:ConnectionID"`
+	CollaboratingHub *CommunityCenter  `gorm:"foreignKey:CollaboratingHubID"`
+	Creator          User              `gorm:"foreignKey:CreatedBy"`
+}
+
+func (HubActivity) TableName() string {
+	return "hub_activities"
+}
+
+func (h *HubActivity) BeforeCreate(tx *gorm.DB) error {
+	if h.ID == uuid.Nil {
+		h.ID = uuid.New()
+	}
+	return nil
+}
+
 // RoleUpgradeRequest model - requests for role upgrades requiring admin approval
 type RoleUpgradeRequest struct {
 	ID            uuid.UUID                `gorm:"type:uuid;primaryKey;column:id"`
@@ -385,6 +433,7 @@ func AutoMigrate(gdb *gorm.DB) error {
 		&Entrepreneur{},
 		&HubEnrollment{},
 		&ServiceProvision{},
+		&HubActivity{},
 		&RoleUpgradeRequest{},
 	)
 }
