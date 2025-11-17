@@ -20,6 +20,10 @@ import {
 } from 'lucide-react';
 import { apiService } from '../services/api';
 import activityService, { HubActivity } from '../services/activity';
+import { EnrollmentDialog } from './EnrollmentDialog';
+import { EnrollmentList } from './EnrollmentList';
+import { LogServiceDialog } from './LogServiceDialog';
+import { ServiceProvisionList } from './ServiceProvisionList';
 
 interface HubStats {
   totalEnrollments: number;
@@ -42,6 +46,10 @@ export function HubDashboard({ onNavigate, onSelectCenter }: HubDashboardProps) 
   const [stats, setStats] = useState<HubStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showEnrollmentDialog, setShowEnrollmentDialog] = useState(false);
+  const [enrollmentRefreshTrigger, setEnrollmentRefreshTrigger] = useState(0);
+  const [showLogServiceDialog, setShowLogServiceDialog] = useState(false);
+  const [serviceRefreshTrigger, setServiceRefreshTrigger] = useState(0);
 
   useEffect(() => {
     loadDashboardData();
@@ -206,11 +214,21 @@ export function HubDashboard({ onNavigate, onSelectCenter }: HubDashboardProps) 
           </CardHeader>
           <CardContent>
             <div className="flex flex-col space-y-2">
-              <Button size="sm" variant="outline" className="w-full justify-start" disabled>
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => setShowEnrollmentDialog(true)}
+              >
                 <Plus className="h-3 w-3 mr-2" />
                 Enroll Entrepreneur
               </Button>
-              <Button size="sm" variant="outline" className="w-full justify-start" disabled>
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => setShowLogServiceDialog(true)}
+              >
                 <TrendingUp className="h-3 w-3 mr-2" />
                 Log Service
               </Button>
@@ -218,6 +236,48 @@ export function HubDashboard({ onNavigate, onSelectCenter }: HubDashboardProps) 
           </CardContent>
         </Card>
       </div>
+
+      {/* Enrollments List */}
+      {center && (
+        <EnrollmentList
+          hubId={center.id}
+          refreshTrigger={enrollmentRefreshTrigger}
+        />
+      )}
+
+      {/* Services List */}
+      {center && (
+        <ServiceProvisionList
+          hubId={center.id}
+          refreshTrigger={serviceRefreshTrigger}
+        />
+      )}
+
+      {/* Enrollment Dialog */}
+      {center && (
+        <EnrollmentDialog
+          isOpen={showEnrollmentDialog}
+          onClose={() => setShowEnrollmentDialog(false)}
+          hubId={center.id}
+          onSuccess={() => {
+            setEnrollmentRefreshTrigger(prev => prev + 1);
+            loadDashboardData();
+          }}
+        />
+      )}
+
+      {/* Log Service Dialog */}
+      {center && (
+        <LogServiceDialog
+          isOpen={showLogServiceDialog}
+          onClose={() => setShowLogServiceDialog(false)}
+          hubId={center.id}
+          onSuccess={() => {
+            setServiceRefreshTrigger(prev => prev + 1);
+            loadDashboardData();
+          }}
+        />
+      )}
 
       {/* Recent Activities */}
       <Card>

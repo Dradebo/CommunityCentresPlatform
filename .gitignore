@@ -182,3 +182,20 @@ backend/uploads/
 *.srl
 *.zip
 *.md
+
+# Go backend environment and database files
+go-backend/.env
+go-backend/.env.*
+
+# SQL import scripts (contain production data and hashes)
+*.sql
+railway-import.sql
+*-import.sql
+
+# CSV data files (contain real organization data - PII)
+*.csv
+go-backend/data/*.csv
+
+# Temporary utility scripts (hash generators, SQL generators)
+go-backend/cmd/generate-hash/
+go-backend/cmd/generate-sql/

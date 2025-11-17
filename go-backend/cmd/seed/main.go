@@ -62,10 +62,27 @@ func main() {
 	}
 	fmt.Printf("Created visitor user: %s\n", visitor.Email)
 
+	// Create center manager user
+	managerPassword, _ := auth.HashPassword("admin123")
+	centerManager := db.User{
+		Email:    "manager@kampalacenters.org",
+		Password: managerPassword,
+		Name:     "Test Center Manager",
+		Role:     db.RoleCenterManager,
+		Verified: true,
+	}
+
+	result = database.DB.Where("email = ?", centerManager.Email).FirstOrCreate(&centerManager)
+	if result.Error != nil {
+		log.Fatalf("failed to create center manager user: %v", result.Error)
+	}
+	fmt.Printf("Created center manager user: %s\n", centerManager.Email)
+
 	// Define community centers
 	centerData := []struct {
 		center      db.CommunityCenter
 		isAdmin     bool
+		isManager   bool
 	}{
 		{
 			center: db.CommunityCenter{
@@ -74,6 +91,7 @@ func main() {
 				Latitude:    0.3476,
 				Longitude:   32.5825,
 				Services:    db.StringArray{"Skills Training", "Healthcare", "Education", "Microfinance"},
+				Resources:   db.StringArray{"Computer Lab", "Meeting Rooms", "Trained Staff"},
 				Description: "A comprehensive community center serving Central Kampala with various social services.",
 				Verified:    true,
 				AddedBy:     admin.ID.String(),
@@ -83,6 +101,24 @@ func main() {
 				Website:     stringPtr("www.kampalahub.org"),
 			},
 			isAdmin: true,
+		},
+		{
+			center: db.CommunityCenter{
+				Name:        "Nakawa Skills Training Center",
+				Location:    "Nakawa Division, Kampala",
+				Latitude:    0.3217,
+				Longitude:   32.6149,
+				Services:    db.StringArray{"Vocational Training", "Business Development", "Entrepreneurship Support"},
+				Resources:   db.StringArray{"Workshop Space", "Training Materials", "Business Mentors"},
+				Description: "A verified center managed by a center manager, focusing on skills development and entrepreneur support.",
+				Verified:    true,
+				AddedBy:     centerManager.ID.String(),
+				ManagerID:   &centerManager.ID,
+				Phone:       stringPtr("+256-700-456789"),
+				Email:       stringPtr("info@nakawaskills.org"),
+				Website:     stringPtr("www.nakawaskills.org"),
+			},
+			isManager: true,
 		},
 		{
 			center: db.CommunityCenter{
@@ -273,6 +309,7 @@ func main() {
 	fmt.Println("\nDatabase seeded successfully!")
 	fmt.Println("\nLogin credentials:")
 	fmt.Println("Admin: admin@kampalacenters.org / admin123")
+	fmt.Println("Center Manager: manager@kampalacenters.org / admin123")
 	fmt.Println("Visitor: visitor@example.com / visitor123")
 	fmt.Printf("\nCreated %d community centers across Kampala divisions\n", len(centers))
 }
