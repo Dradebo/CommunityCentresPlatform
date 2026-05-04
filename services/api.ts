@@ -1,8 +1,14 @@
 import { API_BASE_URL } from '../utils/env';
 
-// API service for connecting to the backend
+// Static mode: use local JSON when backend is unavailable
+const STATIC_CENTERS_URL = '/centers.json';
+
+// API service - now works in static mode with local JSON fallback
+let staticCentersCache: any[] | null = null;
 
 class APIService {
+  private useStaticMode = false;
+
   private getAuthToken(): string | null {
     try {
       return localStorage.getItem('auth_token');
@@ -32,89 +38,95 @@ class APIService {
     return response.json();
   }
 
-  // Authentication methods
+  // Load centers from static JSON file
+  private async loadStaticCenters(): Promise<any[]> {
+    if (staticCentersCache) return staticCentersCache;
+    
+    try {
+      const response = await fetch(STATIC_CENTERS_URL);
+      if (!response.ok) throw new Error('Failed to load static centers');
+      const data = await response.json();
+      staticCentersCache = data;
+      return data;
+    } catch (error) {
+      console.error('Error loading static centers:', error);
+      return [];
+    }
+  }
+
+  // Filter static centers based on criteria
+  private filterCenters(centers: any[], filters?: {
+    searchQuery?: string;
+    services?: string[];
+    locations?: string[];
+    verificationStatus?: string;
+    connectionStatus?: string;
+    addedBy?: string;
+  }): any[] {
+    if (!filters) return centers;
+    
+    return centers.filter(center => {
+      if (filters.searchQuery) {
+        const query = filters.searchQuery.toLowerCase();
+        const searchText = `${center.name} ${center.location} ${center.description} ${center.services?.join(' ')}`.toLowerCase();
+        if (!searchText.includes(query)) return false;
+      }
+      
+      if (filters.services && filters.services.length > 0) {
+        if (!filters.services.some((s: string) => center.services?.includes(s))) return false;
+      }
+      
+      if (filters.locations && filters.locations.length > 0) {
+        if (!filters.locations.some((l: string) => center.location?.includes(l))) return false;
+      }
+      
+      if (filters.verificationStatus !== undefined) {
+        const isVerified = filters.verificationStatus === 'true';
+        if (center.verified !== isVerified) return false;
+      }
+      
+      if (filters.addedBy) {
+        if (center.addedBy !== filters.addedBy) return false;
+      }
+      
+      return true;
+    });
+  }
+
+  // Authentication methods (disabled in static mode)
   async register(userData: {
     email: string;
     password: string;
     name: string;
     role?: 'VISITOR' | 'CENTER_MANAGER' | 'ENTREPRENEUR';
   }) {
-    const response = await fetch(`${API_BASE_URL}/auth/register`, {
-      method: 'POST',
-      headers: this.getAuthHeaders(),
-      body: JSON.stringify(userData),
-    });
-    
-    const result = await this.handleResponse<{
-      message: string;
-      token: string;
-      user: any;
-    }>(response);
-    
-    if (result.token) {
-      localStorage.setItem('auth_token', result.token);
-    }
-    
-    return result;
+    console.warn('Auth disabled in static mode');
+    return { message: 'Auth disabled', token: '', user: null };
   }
 
   async login(credentials: { email: string; password: string }) {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: 'POST',
-      headers: this.getAuthHeaders(),
-      body: JSON.stringify(credentials),
-    });
-
-    const result = await this.handleResponse<{
-      message: string;
-      token: string;
-      user: any;
-    }>(response);
-
-    if (result.token) {
-      localStorage.setItem('auth_token', result.token);
-    }
-
-    return result;
+    console.warn('Auth disabled in static mode');
+    return { message: 'Auth disabled', token: '', user: null };
   }
 
   async loginWithGoogle(credential: string) {
-    const response = await fetch(`${API_BASE_URL}/auth/google/verify`, {
-      method: 'POST',
-      headers: this.getAuthHeaders(),
-      body: JSON.stringify({ credential }),
-    });
-
-    const result = await this.handleResponse<{
-      message: string;
-      token: string;
-      user: any;
-    }>(response);
-
-    if (result.token) {
-      localStorage.setItem('auth_token', result.token);
-    }
-
-    return result;
+    console.warn('Auth disabled in static mode');
+    return { message: 'Auth disabled', token: '', user: null };
   }
 
   async getCurrentUser() {
-    const response = await fetch(`${API_BASE_URL}/auth/me`, {
-      headers: this.getAuthHeaders(),
-    });
-    
-    return this.handleResponse<{ user: any }>(response);
+    return { user: null };
   }
 
   logout() {
     try {
       localStorage.removeItem('auth_token');
     } catch {
-      // Ignore localStorage errors in SSR or other environments
+      // Ignore localStorage errors
     }
   }
 
-  // Centers methods
+  // Centers methods - now uses static JSON
   async getCenters(filters?: {
     searchQuery?: string;
     services?: string[];
@@ -123,25 +135,10 @@ class APIService {
     connectionStatus?: string;
     addedBy?: string;
   }) {
-    const params = new URLSearchParams();
-    
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
-          if (Array.isArray(value)) {
-            params.append(key, value.join(','));
-          } else {
-            params.append(key, value.toString());
-          }
-        }
-      });
-    }
-    
-    const response = await fetch(`${API_BASE_URL}/centers/?${params}`, {
-      headers: this.getAuthHeaders(),
-    });
-    
-    return this.handleResponse<{ centers: any[] }>(response);
+    // Use static JSON directly - no backend needed
+    const centers = await this.loadStaticCenters();
+    const filtered = this.filterCenters(centers, filters);
+    return { centers: filtered };
   }
 
   async getCenter(id: string) {
