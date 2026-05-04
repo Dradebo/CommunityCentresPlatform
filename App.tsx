@@ -3,6 +3,7 @@ import { LeafletMap } from './components/LeafletMap';
 import { Navigation } from './components/Navigation';
 import { SearchAndFilter } from './components/SearchAndFilter';
 import { CenterCard } from './components/CenterCard';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { Button } from './components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card';
@@ -338,7 +339,9 @@ function AppContent() {
 function App() {
   return (
     <ThemeProvider>
-      <AppContent />
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </ThemeProvider>
   );
 }
