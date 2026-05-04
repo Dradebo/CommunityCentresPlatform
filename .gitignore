@@ -87,7 +87,8 @@ dist
 
 # Gatsby files
 .cache/
-public
+# public/ -- removed to allow static assets like centers.json
+# If you need to ignore other public files, use: public/temp/ etc.
 
 # vue-press build output
 .vuepress/dist
