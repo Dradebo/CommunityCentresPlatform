@@ -3,12 +3,11 @@ import { LeafletMap } from './components/LeafletMap';
 import { Navigation } from './components/Navigation';
 import { SearchAndFilter } from './components/SearchAndFilter';
 import { CenterCard } from './components/CenterCard';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { Button } from './components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card';
 import { Badge } from './components/ui/badge';
-import { MapPin, Users, Building, CheckCircle, Filter, Loader2, Mail, Phone, Globe } from 'lucide-react';
+import { MapPin, Users, Building, CheckCircle, Loader2, Mail, Phone, Globe } from 'lucide-react';
 import { apiService } from './services/api';
 import { Toaster, toast } from 'sonner';
 import { EmptyState } from './components/EmptyState';
@@ -36,8 +35,35 @@ interface FilterCriteria {
   selectedServices: string[];
   selectedLocations: string[];
   verificationStatus: 'all' | 'verified' | 'unverified';
-  addedBy: 'all' | 'admin' | 'user';
 }
+
+// Available services for filter
+const availableServices = [
+  'Healthcare',
+  'Education',
+  'Skills Training',
+  'Youth Programs',
+  'Women Empowerment',
+  'Childcare',
+  'Vocational Training',
+  'Computer Training',
+  'Library',
+  'Microfinance',
+  'Food Security',
+  'Mental Health',
+  'Legal Aid',
+  'Sports & Recreation',
+  'Community Events'
+];
+
+// Kampala divisions for filter
+const availableLocations = [
+  'Central Division',
+  'Kawempe Division',
+  'Rubaga Division',
+  'Makindye Division',
+  'Nakawa Division'
+];
 
 function AppContent() {
   const [currentView, setCurrentView] = useState<'map' | 'list'>('map');
@@ -65,30 +91,29 @@ function AppContent() {
     }
   };
 
-  const handleFilterChange = async (filters: FilterCriteria) => {
+  const handleFilterChange = (filters: FilterCriteria) => {
     const filtered = communityCenters.filter(center => {
+      // Text search
       if (filters.searchQuery) {
         const query = filters.searchQuery.toLowerCase();
         const searchText = `${center.name} ${center.location} ${center.description} ${center.services.join(' ')}`.toLowerCase();
         if (!searchText.includes(query)) return false;
       }
       
+      // Service filter
       if (filters.selectedServices.length > 0) {
         if (!filters.selectedServices.some(s => center.services.includes(s))) return false;
       }
       
+      // Location filter
       if (filters.selectedLocations.length > 0) {
         if (!filters.selectedLocations.some(l => center.location.includes(l))) return false;
       }
       
+      // Verification status
       if (filters.verificationStatus !== 'all') {
         const isVerified = filters.verificationStatus === 'verified';
         if (center.verified !== isVerified) return false;
-      }
-      
-      if (filters.addedBy !== 'all') {
-        const addedByMap: Record<string, string> = { 'admin': 'admin', 'user': 'user' };
-        if (center.addedBy !== addedByMap[filters.addedBy]) return false;
       }
       
       return true;
@@ -136,11 +161,22 @@ function AppContent() {
       <Navigation currentView={currentView} onViewChange={setCurrentView} />
       
       <main className="container mx-auto px-4 py-8">
+        {/* Hero Section */}
+        <section className="mb-8 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
+            Kampala Community Centres Directory
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Find community centres across Kampala. Search by location, services, or verification status. 
+            Contact centres directly via email or phone.
+          </p>
+        </section>
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Centers</CardTitle>
+              <CardTitle className="text-sm font-medium">Total Centres</CardTitle>
               <Building className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -150,7 +186,7 @@ function AppContent() {
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Verified Centers</CardTitle>
+              <CardTitle className="text-sm font-medium">Verified Centres</CardTitle>
               <CheckCircle className="h-4 w-4 text-green-500" />
             </CardHeader>
             <CardContent>
@@ -170,7 +206,11 @@ function AppContent() {
         </div>
 
         {/* Search and Filter */}
-        <SearchAndFilter onFilterChange={handleFilterChange} />
+        <SearchAndFilter 
+          onFilterChange={handleFilterChange}
+          availableServices={availableServices}
+          availableLocations={availableLocations}
+        />
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
@@ -185,12 +225,12 @@ function AppContent() {
 
           {/* Centers List */}
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold">Community Centers Directory</h2>
+            <h2 className="text-xl font-semibold">Community Centres</h2>
             {filteredCenters.length === 0 ? (
               <EmptyState
                 icon={<Building className="h-12 w-12 text-muted-foreground" />}
-                title="No centers found"
-                description="Try adjusting your search criteria or filters to find community centers."
+                title="No centres found"
+                description="Try adjusting your search criteria or filters to find community centres."
                 action={
                   <Button variant="outline" onClick={() => loadCenters()}>
                     Clear Filters
@@ -220,8 +260,8 @@ function AppContent() {
                       
                       <div className="flex flex-wrap gap-1 mb-3">
                         {center.services.slice(0, 3).map(service => (
-                          <Badge key={service} variant="secondary" className="text-xs">{service}</Badge>
-                        ))}
+                            <Badge key={service} variant="secondary" className="text-xs">{service}</Badge>
+                          ))}
                         {center.services.length > 3 && (
                           <Badge variant="secondary" className="text-xs">+{center.services.length - 3}</Badge>
                         )}
@@ -324,7 +364,7 @@ function AppContent() {
               
               <Button onClick={() => handleContactCenter(selectedCenter)}>
                 <Mail className="h-4 w-4 mr-2" />
-                Contact This Center
+                Contact This Centre
               </Button>
             </CardContent>
           </Card>
@@ -339,9 +379,7 @@ function AppContent() {
 function App() {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
+      <AppContent />
     </ThemeProvider>
   );
 }

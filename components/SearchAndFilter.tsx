@@ -15,203 +15,74 @@ import {
   MapPin,
   Users,
   CheckCircle,
-  AlertTriangle,
-  Building
 } from 'lucide-react';
-import { availableResources, resourceCategories, ResourceCategory } from '../utils/resources';
-
-interface CommunityCenterData {
-  id: string;
-  name: string;
-  location: string;
-  coordinates: { lat: number; lng: number };
-  services: string[];
-  resources?: string[];
-  description: string;
-  verified: boolean;
-  connections: string[];
-  addedBy: 'admin' | 'visitor';
-  contactInfo: {
-    phone?: string;
-    email?: string;
-    website?: string;
-  };
-}
 
 interface FilterCriteria {
   searchQuery: string;
   selectedServices: string[];
-  selectedResources: string[];
   selectedLocations: string[];
   verificationStatus: 'all' | 'verified' | 'unverified';
-  connectionStatus: 'all' | 'connected' | 'standalone';
-  addedBy: 'all' | 'admin' | 'visitor';
 }
 
 interface SearchAndFilterProps {
-  centers: CommunityCenterData[];
-  onFilterChange: (filteredCenters: CommunityCenterData[], activeFilters: FilterCriteria) => void;
+  onFilterChange: (filters: FilterCriteria) => void;
+  availableServices: string[];
+  availableLocations: string[];
 }
 
-const availableServices = [
-  'Healthcare',
-  'Education', 
-  'Skills Training',
-  'Youth Programs',
-  'Women Empowerment',
-  'Childcare',
-  'Vocational Training',
-  'Computer Training',
-  'Library',
-  'Microfinance',
-  'Food Security',
-  'Mental Health',
-  'Legal Aid',
-  'Sports & Recreation',
-  'Community Events'
-];
+const defaultFilters: FilterCriteria = {
+  searchQuery: '',
+  selectedServices: [],
+  selectedLocations: [],
+  verificationStatus: 'all',
+};
 
-const kampalaLocations = [
-  'Central Division',
-  'Kawempe Division',
-  'Rubaga Division',
-  'Makindye Division',
-  'Nakawa Division'
-];
-
-export function SearchAndFilter({ centers, onFilterChange }: SearchAndFilterProps) {
-  const [filters, setFilters] = useState<FilterCriteria>({
-    searchQuery: '',
-    selectedServices: [],
-    selectedResources: [],
-    selectedLocations: [],
-    verificationStatus: 'all',
-    connectionStatus: 'all',
-    addedBy: 'all'
-  });
-
+export function SearchAndFilter({ onFilterChange, availableServices, availableLocations }: SearchAndFilterProps) {
+  const [filters, setFilters] = useState<FilterCriteria>(defaultFilters);
   const [isExpanded, setIsExpanded] = useState(false);
 
   const applyFilters = (newFilters: FilterCriteria) => {
-    let filteredCenters = centers;
-
-    // Text search
-    if (newFilters.searchQuery.trim()) {
-      const query = newFilters.searchQuery.toLowerCase();
-      filteredCenters = filteredCenters.filter(center =>
-        center.name.toLowerCase().includes(query) ||
-        center.location.toLowerCase().includes(query) ||
-        center.description.toLowerCase().includes(query) ||
-        center.services.some(service => service.toLowerCase().includes(query)) ||
-        center.resources?.some(resource => resource.toLowerCase().includes(query))
-      );
-    }
-
-    // Service filters
-    if (newFilters.selectedServices.length > 0) {
-      filteredCenters = filteredCenters.filter(center =>
-        newFilters.selectedServices.some(service => center.services.includes(service))
-      );
-    }
-
-    // Resource filters
-    if (newFilters.selectedResources.length > 0) {
-      filteredCenters = filteredCenters.filter(center =>
-        newFilters.selectedResources.some(resource => center.resources?.includes(resource))
-      );
-    }
-
-    // Location filters
-    if (newFilters.selectedLocations.length > 0) {
-      filteredCenters = filteredCenters.filter(center =>
-        newFilters.selectedLocations.some(location => center.location.includes(location))
-      );
-    }
-
-    // Verification status
-    if (newFilters.verificationStatus !== 'all') {
-      filteredCenters = filteredCenters.filter(center =>
-        newFilters.verificationStatus === 'verified' ? center.verified : !center.verified
-      );
-    }
-
-    // Connection status
-    if (newFilters.connectionStatus !== 'all') {
-      filteredCenters = filteredCenters.filter(center =>
-        newFilters.connectionStatus === 'connected' 
-          ? center.connections.length > 0 
-          : center.connections.length === 0
-      );
-    }
-
-    // Added by filter
-    if (newFilters.addedBy !== 'all') {
-      filteredCenters = filteredCenters.filter(center =>
-        center.addedBy === newFilters.addedBy
-      );
-    }
-
-    onFilterChange(filteredCenters, newFilters);
+    setFilters(newFilters);
+    onFilterChange(newFilters);
   };
 
-  const handleFilterChange = (key: keyof FilterCriteria, value: any) => {
-    const newFilters = { ...filters, [key]: value };
-    setFilters(newFilters);
-    applyFilters(newFilters);
+  const handleSearchChange = (value: string) => {
+    applyFilters({ ...filters, searchQuery: value });
   };
 
   const handleServiceToggle = (service: string) => {
     const newServices = filters.selectedServices.includes(service)
       ? filters.selectedServices.filter(s => s !== service)
       : [...filters.selectedServices, service];
-    handleFilterChange('selectedServices', newServices);
+    applyFilters({ ...filters, selectedServices: newServices });
   };
 
   const handleLocationToggle = (location: string) => {
     const newLocations = filters.selectedLocations.includes(location)
       ? filters.selectedLocations.filter(l => l !== location)
       : [...filters.selectedLocations, location];
-    handleFilterChange('selectedLocations', newLocations);
+    applyFilters({ ...filters, selectedLocations: newLocations });
   };
 
-  const handleResourceToggle = (resource: string) => {
-    const newResources = filters.selectedResources.includes(resource)
-      ? filters.selectedResources.filter(r => r !== resource)
-      : [...filters.selectedResources, resource];
-    handleFilterChange('selectedResources', newResources);
+  const handleVerificationChange = (value: string) => {
+    applyFilters({ ...filters, verificationStatus: value as FilterCriteria['verificationStatus'] });
   };
 
   const clearAllFilters = () => {
-    const emptyFilters: FilterCriteria = {
-      searchQuery: '',
-      selectedServices: [],
-      selectedResources: [],
-      selectedLocations: [],
-      verificationStatus: 'all',
-      connectionStatus: 'all',
-      addedBy: 'all'
-    };
-    setFilters(emptyFilters);
-    applyFilters(emptyFilters);
+    applyFilters(defaultFilters);
   };
 
   const hasActiveFilters =
     filters.searchQuery.trim() !== '' ||
     filters.selectedServices.length > 0 ||
-    filters.selectedResources.length > 0 ||
     filters.selectedLocations.length > 0 ||
-    filters.verificationStatus !== 'all' ||
-    filters.connectionStatus !== 'all' ||
-    filters.addedBy !== 'all';
+    filters.verificationStatus !== 'all';
 
   const activeFilterCount = [
     filters.searchQuery.trim() !== '',
     filters.selectedServices.length > 0,
-    filters.selectedResources.length > 0,
     filters.selectedLocations.length > 0,
     filters.verificationStatus !== 'all',
-    filters.connectionStatus !== 'all',
-    filters.addedBy !== 'all'
   ].filter(Boolean).length;
 
   return (
@@ -220,7 +91,7 @@ export function SearchAndFilter({ centers, onFilterChange }: SearchAndFilterProp
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center space-x-2">
             <Search className="h-5 w-5" />
-            <span>Search & Filter Centers</span>
+            <span>Search & Filter</span>
             {activeFilterCount > 0 && (
               <Badge variant="secondary">{activeFilterCount} active</Badge>
             )}
@@ -248,9 +119,9 @@ export function SearchAndFilter({ centers, onFilterChange }: SearchAndFilterProp
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            placeholder="Search by name, location, description, or services..."
+            placeholder="Search by name, location, or services..."
             value={filters.searchQuery}
-            onChange={(e) => handleFilterChange('searchQuery', e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="pl-10"
           />
         </div>
@@ -261,12 +132,6 @@ export function SearchAndFilter({ centers, onFilterChange }: SearchAndFilterProp
             <Badge key={service} variant="default" className="cursor-pointer">
               {service}
               <X className="h-3 w-3 ml-1" onClick={() => handleServiceToggle(service)} />
-            </Badge>
-          ))}
-          {filters.selectedResources.map(resource => (
-            <Badge key={resource} variant="default" className="cursor-pointer bg-purple-600">
-              {resource}
-              <X className="h-3 w-3 ml-1" onClick={() => handleResourceToggle(resource)} />
             </Badge>
           ))}
           {filters.selectedLocations.map(location => (
@@ -303,35 +168,6 @@ export function SearchAndFilter({ centers, onFilterChange }: SearchAndFilterProp
               </div>
             </div>
 
-            {/* Resources Filter */}
-            <div>
-              <h4 className="mb-3 flex items-center space-x-2">
-                <Building className="h-4 w-4" />
-                <span>Resources</span>
-              </h4>
-              {(Object.keys(availableResources) as ResourceCategory[]).map((categoryKey) => (
-                <div key={categoryKey} className="mb-4">
-                  <h5 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    {resourceCategories[categoryKey]}
-                  </h5>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    {availableResources[categoryKey].map((resource) => (
-                      <div key={resource} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`filter-${resource}`}
-                          checked={filters.selectedResources.includes(resource)}
-                          onCheckedChange={() => handleResourceToggle(resource)}
-                        />
-                        <label htmlFor={`filter-${resource}`} className="text-sm cursor-pointer">
-                          {resource}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-
             {/* Location Filter */}
             <div>
               <h4 className="mb-3 flex items-center space-x-2">
@@ -339,7 +175,7 @@ export function SearchAndFilter({ centers, onFilterChange }: SearchAndFilterProp
                 <span>Divisions</span>
               </h4>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {kampalaLocations.map(location => (
+                {availableLocations.map(location => (
                   <div key={location} className="flex items-center space-x-2">
                     <Checkbox
                       id={location}
@@ -354,67 +190,25 @@ export function SearchAndFilter({ centers, onFilterChange }: SearchAndFilterProp
               </div>
             </div>
 
-            {/* Status Filters */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <h4 className="mb-2 flex items-center space-x-2">
-                  <CheckCircle className="h-4 w-4" />
-                  <span>Verification Status</span>
-                </h4>
-                <Select 
-                  value={filters.verificationStatus} 
-                  onValueChange={(value) => handleFilterChange('verificationStatus', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Centers</SelectItem>
-                    <SelectItem value="verified">Verified Only</SelectItem>
-                    <SelectItem value="unverified">Unverified Only</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <h4 className="mb-2 flex items-center space-x-2">
-                  <Users className="h-4 w-4" />
-                  <span>Connection Status</span>
-                </h4>
-                <Select 
-                  value={filters.connectionStatus} 
-                  onValueChange={(value) => handleFilterChange('connectionStatus', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Centers</SelectItem>
-                    <SelectItem value="connected">Connected Centers</SelectItem>
-                    <SelectItem value="standalone">Standalone Centers</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <h4 className="mb-2 flex items-center space-x-2">
-                  <AlertTriangle className="h-4 w-4" />
-                  <span>Added By</span>
-                </h4>
-                <Select 
-                  value={filters.addedBy} 
-                  onValueChange={(value) => handleFilterChange('addedBy', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Sources</SelectItem>
-                    <SelectItem value="admin">Admin Added</SelectItem>
-                    <SelectItem value="visitor">Visitor Added</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            {/* Verification Status Filter */}
+            <div>
+              <h4 className="mb-2 flex items-center space-x-2">
+                <CheckCircle className="h-4 w-4" />
+                <span>Verification Status</span>
+              </h4>
+              <Select 
+                value={filters.verificationStatus} 
+                onValueChange={handleVerificationChange}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Centres</SelectItem>
+                  <SelectItem value="verified">Verified Only</SelectItem>
+                  <SelectItem value="unverified">Unverified Only</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </CollapsibleContent>
         </Collapsible>
