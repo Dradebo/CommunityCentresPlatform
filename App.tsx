@@ -11,6 +11,7 @@ import { MapPin, Users, Building, CheckCircle, Filter, Loader2, Mail, Phone, Glo
 import { apiService } from './services/api';
 import { Toaster, toast } from 'sonner';
 import { EmptyState } from './components/EmptyState';
+import { MapSkeleton } from './components/skeletons/MapSkeleton';
 import { CenterCardSkeletonGrid } from './components/skeletons/CenterCardSkeleton';
 import { StatCardSkeletonRow } from './components/skeletons/StatCardSkeleton';
 
