@@ -94,5 +94,37 @@
     "addedBy": "user",
     "createdAt": "2025-11-01T08:00:00Z",
     "updatedAt": "2025-11-01T08:00:00Z"
+  },
+  {
+    "id": "7",
+    "name": "Kawempe Youth Centre",
+    "location": "Kawempe, Kampala",
+    "latitude": 0.379653,
+    "longitude": 32.5608012,
+    "description": "Youth-oriented community centre in Kawempe with a strong local presence for training, mentoring, and sports coordination.",
+    "services": ["Youth Programs", "Sports & Recreation", "Mentorship", "Meeting Space"],
+    "contactPhone": "",
+    "contactEmail": "",
+    "website": "",
+    "verified": true,
+    "addedBy": "research",
+    "createdAt": "2025-12-15T08:00:00Z",
+    "updatedAt": "2025-12-15T08:00:00Z"
+  },
+  {
+    "id": "8",
+    "name": "KCCA Town Hall",
+    "location": "Nakasero, Kampala",
+    "latitude": 0.3149957,
+    "longitude": 32.5859405,
+    "description": "Civic meeting venue used for public-facing city coordination, engagements, and community consultations.",
+    "services": ["Meeting Space", "Community Events", "Public Consultations", "Civic Engagement"],
+    "contactPhone": "",
+    "contactEmail": "",
+    "website": "https://www.kcca.go.ug",
+    "verified": true,
+    "addedBy": "research",
+    "createdAt": "2025-12-15T08:00:00Z",
+    "updatedAt": "2025-12-15T08:00:00Z"
   }
 ]
