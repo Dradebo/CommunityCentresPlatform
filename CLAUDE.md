@@ -914,7 +914,7 @@ Use `bd list` to view all issues and `bd show bd-18` for detailed Phase A2-A6 pl
 ## Current Deployment State (October 2025)
 
 ### Production URLs
-- **Frontend:** https://community-centres-platform.vercel.app (Vercel)
+- **Frontend:** https://centres.kii-impact.org (custom domain on Vercel)
 - **Backend:** https://communitycentresplatform-production-6caf.up.railway.app (Railway)
 - **Database:** PostgreSQL on Railway
 
@@ -962,7 +962,7 @@ Use `bd list` to view all issues and `bd show bd-18` for detailed Phase A2-A6 pl
 - ✅ All changes committed and pushed to GitHub (5 commits)
 - ✅ Vercel deployment triggered automatically
 - ✅ Build successful with Google Maps v2 API
-- ✅ Production site: https://community-centres-platform.vercel.app
+- ✅ Production site: https://centres.kii-impact.org
 - ⚠️ Requires `VITE_GOOGLE_MAPS_API_KEY` set in Vercel environment variables
 
 **Beads Tracking:**
@@ -1251,7 +1251,7 @@ VITE_GOOGLE_MAPS_API_KEY="AIzaSyD-your-api-key-here"
 2. Enable APIs: Maps JavaScript API, Places API, Geocoding API
 3. Create API key in Credentials
 4. Restrict API key:
-   - **HTTP referrers**: Add Vercel domain (https://community-centres-platform.vercel.app/*)
+   - **HTTP referrers**: Add custom domain (https://centres.kii-impact.org/*)
    - **API restrictions**: Only allow the 3 required APIs
 5. Enable billing (required, but $200/month free tier covers most usage)
 6. Set usage quotas and billing alerts

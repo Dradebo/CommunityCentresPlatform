@@ -170,9 +170,6 @@ function AppContent() {
             Find community centres across Kampala. Search by location, services, or verification status. 
             Contact centres directly via email or phone.
           </p>
-          <div className="mt-4 inline-flex max-w-3xl items-center rounded-full border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200">
-            Public directory mode: this site now runs from a maintained static centres dataset with direct contact links.
-          </div>
         </section>
 
         {/* Stats Cards */}

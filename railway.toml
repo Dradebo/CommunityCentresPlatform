@@ -15,6 +15,6 @@ restartPolicyMaxRetries = 3
 # Railway environment variables required (set in Railway dashboard):
 # - DATABASE_URL (auto-populated by PostgreSQL addon)
 # - JWT_SECRET (generate with: openssl rand -base64 32)
-# - FRONTEND_URL (e.g., https://community-centres-platform.vercel.app)
+# - FRONTEND_URL (e.g., https://centres.kii-impact.org)
 # - PORT (optional, Railway auto-assigns if not set)
 # - GIN_MODE=release (recommended for production)

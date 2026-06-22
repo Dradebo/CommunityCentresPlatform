@@ -3,7 +3,7 @@
 // as a browse + contact surface backed by versioned JSON data.
 
 const STATIC_CENTERS_URL = '/centers.json';
-const STATIC_MODE_ERROR = 'This action is unavailable in public directory mode.';
+const STATIC_MODE_ERROR = 'This action is unavailable in the current site mode.';
 
 let staticCentersCache: any[] | null = null;
 

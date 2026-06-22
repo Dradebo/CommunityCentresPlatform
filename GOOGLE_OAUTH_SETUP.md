@@ -55,7 +55,7 @@ Navigate to **APIs & Services** → **Library** and enable:
 5. **Authorized JavaScript origins:**
    ```
    https://centres.kii-impact.org
-   https://community-centres-platform.vercel.app
+   https://centres.kii-impact.org
    http://localhost:3000
    ```
 
@@ -125,7 +125,7 @@ GOOGLE_CLIENT_ID="YOUR_GOOGLE_CLIENT_ID_HERE.apps.googleusercontent.com"
    - Add referrers:
      ```
      https://centres.kii-impact.org/*
-     https://community-centres-platform.vercel.app/*
+     https://centres.kii-impact.org/*
      http://localhost:3000/*
      ```
 
