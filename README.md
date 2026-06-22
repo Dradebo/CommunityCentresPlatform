@@ -189,6 +189,11 @@ New users can register as either:
 
 ## 🚀 Deployment
 
+### Canonical Production URL
+- `https://centres.kii-impact.org`
+- This is the URL to use in docs, OAuth setup, and user-facing references once the custom domain is live.
+- If DNS is being changed, verify both resolver output and HTTPS response before switching anything in the docs or app config.
+
 ### Railway Deployment
 
 #### Backend Deployment

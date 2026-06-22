@@ -495,14 +495,21 @@ The app uses React Context + hooks pattern:
 
 ## Deployment Options
 
-### Planned Deployment: Railway + Vercel → kii-impact.org/centres
+### Current Deployment: Railway + Vercel → centres.kii-impact.org
 
 **Target Architecture**:
 
 - **Backend**: Railway with PostgreSQL addon
 - **Frontend**: Vercel (deployed from GitHub)
-- **Domain**: kii-impact.org/centres (subdirectory, not subdomain)
-- **DNS**: cPanel DNS configuration with CNAME or proxy rules
+- **Domain**: `centres.kii-impact.org` (dedicated subdomain)
+- **DNS**: cPanel DNS CNAME pointing `centres` to `cname.vercel-dns.com`
+
+**Custom Domain Learnings**:
+
+- Prefer a dedicated subdomain over a path-based deployment when Vercel is the frontend host.
+- Keep the origin URL in the app/docs aligned with the live custom domain, not the raw Vercel hostname, once the custom domain is active.
+- After changing DNS in cPanel, verify both DNS resolution and live HTTPS response before declaring the domain ready.
+- For this project, the working record was a `centres` CNAME to `cname.vercel-dns.com`.
 
 **Deployment Steps**:
 
@@ -537,10 +544,11 @@ The app uses React Context + hooks pattern:
    - In Railway dashboard: Set `FRONTEND_URL` to Vercel URL (for CORS)
    - Test: Visit Vercel URL and verify API connection
 
-4. **cPanel DNS Configuration** (Optional - for custom domain):
-   - Option A: CNAME record pointing `centres.kii-impact.org` to Vercel
-   - Option B: Reverse proxy rule in `.htaccess` routing `/centres/*` to Vercel
-   - Ensure HTTPS is configured (domain already has SSL)
+4. **cPanel DNS Configuration** (for the live custom domain):
+   - Add a CNAME record for `centres` → `cname.vercel-dns.com`
+   - Wait for DNS propagation if public resolvers still show the old answer
+   - Verify with both `dig/nslookup` and a live `curl`/browser check
+   - Ensure HTTPS is configured (the live domain should answer cleanly over TLS)
 
 **Troubleshooting Vercel Deployment**:
 

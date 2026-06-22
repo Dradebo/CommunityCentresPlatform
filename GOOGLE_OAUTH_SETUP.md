@@ -12,6 +12,7 @@ This guide walks you through setting up Google OAuth Single Sign-On for the Comm
 - Access to Vercel dashboard (frontend deployment)
 - Access to Railway dashboard (backend deployment)
 - Domain: centres.kii-impact.org
+- Custom domain note: use the live subdomain in OAuth origins/referrers; keep the Vercel hostname only as a fallback/debug reference, not the canonical app URL.
 
 ---
 

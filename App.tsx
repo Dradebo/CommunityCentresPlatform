@@ -162,14 +162,26 @@ function AppContent() {
       
       <main className="container mx-auto px-4 py-8">
         {/* Hero Section */}
-        <section className="mb-8 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
-            Kampala Community Centres Directory
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Find community centres across Kampala. Search by location, services, or verification status. 
-            Contact centres directly via email or phone.
-          </p>
+        <section className="mb-8 rounded-2xl border border-border bg-gradient-to-br from-background via-background to-muted/40 p-6 md:p-8 shadow-sm">
+          <div className="max-w-3xl">
+            <p className="text-sm font-medium uppercase tracking-[0.2em] text-green-600 mb-3">
+              Kampala community access map
+            </p>
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
+              Find centres that are open, verified, and ready to use.
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-2xl">
+              Search by location, services, or verification status, then contact centres directly by email or phone.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Button onClick={() => setCurrentView('map')}>
+                View map
+              </Button>
+              <Button variant="outline" onClick={() => setCurrentView('list')}>
+                Browse list
+              </Button>
+            </div>
+          </div>
         </section>
 
         {/* Stats Cards */}
@@ -212,6 +224,13 @@ function AppContent() {
           availableLocations={availableLocations}
         />
 
+        <div className="mb-4 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          <span className="font-medium text-foreground">{filteredCenters.length}</span>
+          <span>centres shown</span>
+          <span aria-hidden="true">•</span>
+          <span>{stats.total} total in the directory</span>
+        </div>
+
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           {/* Map View */}
@@ -230,12 +249,16 @@ function AppContent() {
               <EmptyState
                 icon={<Building className="h-12 w-12 text-muted-foreground" />}
                 title="No centres found"
-                description="Try adjusting your search criteria or filters to find community centres."
-                action={
-                  <Button variant="outline" onClick={() => loadCenters()}>
-                    Clear Filters
-                  </Button>
-                }
+                description="Try a broader search or clear some filters to bring centres back into view."
+                action={{
+                  label: 'Clear filters',
+                  onClick: () => handleFilterChange({
+                    searchQuery: '',
+                    selectedServices: [],
+                    selectedLocations: [],
+                    verificationStatus: 'all',
+                  }),
+                }}
               />
             ) : (
               <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
