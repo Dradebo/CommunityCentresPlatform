@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Community centres map pin">
+  <defs>
+    <linearGradient id="pin" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#22c55e" />
+      <stop offset="100%" stop-color="#15803d" />
+    </linearGradient>
+  </defs>
+  <path d="M32 4c-11.598 0-21 9.402-21 21 0 15.75 21 35 21 35s21-19.25 21-35c0-11.598-9.402-21-21-21Z" fill="url(#pin)"/>
+  <circle cx="32" cy="25" r="10" fill="#f0fdf4"/>
+  <path d="M26 25c0-3.314 2.686-6 6-6 2.097 0 3.943 1.076 5.016 2.705l-2.247 1.48A3.4 3.4 0 0 0 32 21.6a3.4 3.4 0 1 0 0 6.8c1.157 0 2.186-.577 2.801-1.46l2.307 1.387A6 6 0 1 1 26 25Z" fill="#166534"/>
+</svg>
